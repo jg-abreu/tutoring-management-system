@@ -38,4 +38,18 @@ O domínio foi modelado por completo antes de qualquer linha de código. Diagram
 
 ## Status atual
 
-🚧 Em desenvolvimento — fase de design de schema de banco de dados concluída, implementação em Java ainda não iniciada.
+🚧 Em desenvolvimento.
+
+- [x] Modelagem de domínio completa (diagramas ER, classes, fluxos de negócio)
+- [x] Schema de banco de dados desenhado e documentado
+- [x] Schema implementado em PostgreSQL (Neon, banco na nuvem)
+- [x] Projeto Spring Boot criado e configurado (Maven, Java 21, Web/JPA/PostgreSQL Driver/Validation/DevTools)
+- [x] Conexão da aplicação com o banco funcionando (aplicação sobe e conecta com sucesso)
+- [ ] Entidades JPA mapeando o schema
+- [ ] Repositories, services e regras de negócio
+- [ ] Endpoints REST
+
+## Stack de infraestrutura
+
+- **Banco de dados:** PostgreSQL hospedado no [Neon](https://neon.com) (plano gratuito), escolhido para não depender de uma máquina específica
+- **Configuração de conexão:** via variáveis de ambiente (host, nome do banco, usuário, senha), nunca commitadas no repositório
