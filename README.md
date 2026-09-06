@@ -45,7 +45,8 @@ O domínio foi modelado por completo antes de qualquer linha de código. Diagram
 - [x] Schema implementado em PostgreSQL (Neon, banco na nuvem)
 - [x] Projeto Spring Boot criado e configurado (Maven, Java 21, Web/JPA/PostgreSQL Driver/Validation/DevTools)
 - [x] Conexão da aplicação com o banco funcionando (aplicação sobe e conecta com sucesso)
-- [ ] Entidades JPA mapeando o schema
+- [x] Lombok configurado
+- [ ] Entidades JPA mapeando o schema (User pronta; Subject, TutoringBond, Session, Enrollment, Notification pendentes)
 - [ ] Repositories, services e regras de negócio
 - [ ] Endpoints REST
 
@@ -53,3 +54,4 @@ O domínio foi modelado por completo antes de qualquer linha de código. Diagram
 
 - **Banco de dados:** PostgreSQL hospedado no [Neon](https://neon.com) (plano gratuito), escolhido para não depender de uma máquina específica
 - **Configuração de conexão:** via variáveis de ambiente (host, nome do banco, usuário, senha), nunca commitadas no repositório
+- **Lombok:** usado para reduzir código repetitivo (getters, setters, construtores) nas entidades JPA
