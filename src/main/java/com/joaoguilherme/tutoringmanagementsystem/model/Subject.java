@@ -19,6 +19,8 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Subject {
 
+
+
     @Id
     @GeneratedValue
     @UuidGenerator
@@ -43,6 +45,11 @@ public class Subject {
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
+
+    public Subject(User creator, String name) {
+        this.creator = creator;
+        this.name = name;
+    }
 
     @PrePersist
     public void onCreate() {
