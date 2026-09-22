@@ -28,6 +28,7 @@ Grupos de estudo e monitorias acadêmicas costumam ser organizados de forma info
 - **Sessões referenciam o vínculo de monitoria, não o usuário diretamente**, o que torna a cascata de revogação estruturalmente simples: revogar um vínculo cancela automaticamente todas as sessões futuras associadas a ele
 - **Nenhuma exclusão física de dados** — todas as ações destrutivas (desativar usuário, revogar vínculo, cancelar sessão) são reversíveis por natureza, preservando histórico
 - **Chaves primárias em UUID** e **status representados como ENUM nativo do PostgreSQL**, priorizando robustez sobre simplicidade
+- **userUuid recebido explicitamente no corpo das requisições por enquanto** (pendência técnica): o ideal seria extraído de um token de autenticação; isso será ajustado quando a segurança for implementada
 
 ## Diagramas de domínio
 
@@ -49,9 +50,11 @@ O domínio foi modelado por completo antes de qualquer linha de código. Diagram
 - [x] Lombok configurado
 - [x] Todas as 6 entidades JPA mapeadas e validadas contra o schema (User, Subject, TutoringBond, Session, Enrollment, Notification)
 - [x] Repositories criados para todas as entidades
-- [ ] Services com as regras de negócio (SubjectService em andamento: suggestSubject pronto; approve/reject pendentes)
-- [ ] Endpoints REST
-- [ ] Segurança/autenticação
+- [x] SubjectService completo (suggestSubject, approveSubject, rejectSubject), com exceções customizadas e validação de estado
+- [x] SubjectController completo (POST /subjects, PUT /subjects/{id}/approve, PUT /subjects/{id}/reject), com DTOs (records)
+- [ ] Testar o fluxo completo de Subject via HTTP Client
+- [ ] Services e Controllers das demais entidades (TutoringBond, Session, Enrollment, Notification), incluindo cascatas
+- [ ] Segurança/autenticação (para extrair o usuário logado em vez de recebê-lo no corpo da requisição)
 - [ ] Testes automatizados
 
 ## Stack de infraestrutura
@@ -59,3 +62,4 @@ O domínio foi modelado por completo antes de qualquer linha de código. Diagram
 - **Banco de dados:** PostgreSQL hospedado no [Neon](https://neon.com) (plano gratuito), escolhido para não depender de uma máquina específica
 - **Configuração de conexão:** via variáveis de ambiente (host, nome do banco, usuário, senha), nunca commitadas no repositório
 - **Lombok:** usado para reduzir código repetitivo (getters, setters, construtores) nas entidades e services
+- **HTTP Client (IntelliJ Ultimate):** usado para testar os endpoints REST, com arquivos `.http` versionados na pasta `http/`
