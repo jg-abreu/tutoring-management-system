@@ -1,0 +1,18 @@
+###
+
+POST http://localhost:8080/subjects
+Content-Type: application/json
+
+{
+  "userUuid": "899b90d5-673e-4137-abd2-1606d73f9b0e",
+  "subjectName": "Física I"
+}
+
+###
+
+PUT http://localhost:8080/subjects/7b0b5704-d85b-43a2-840c-a10a9464bdae/reject
+Content-Type: application/json
+
+{
+  "adminUuid": "2c53ba13-53cc-4c79-a4f2-31cfbcceb898"
+}
