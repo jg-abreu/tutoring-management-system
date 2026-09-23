@@ -49,4 +49,9 @@ public class TutoringBond {
     public void onCreate() {
         this.createdAt = OffsetDateTime.now();
     }
+
+    public TutoringBond(User requester, Subject subject) {
+        this.requester = requester;
+        this.subject = subject;
+    }
 }

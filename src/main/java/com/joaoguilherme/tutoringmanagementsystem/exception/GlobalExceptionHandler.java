@@ -21,4 +21,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleInvalidSubjectStatusException(InvalidSubjectStatusException ex){
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
+
+    @ExceptionHandler(TutoringBondAlreadyExistsException.class)
+    public ResponseEntity<String> handleTutoringBondAlreadyExistsException(TutoringBondAlreadyExistsException ex){
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
 }
