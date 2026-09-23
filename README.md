@@ -50,12 +50,14 @@ O domínio foi modelado por completo antes de qualquer linha de código. Diagram
 - [x] Lombok configurado
 - [x] Todas as 6 entidades JPA mapeadas e validadas contra o schema (User, Subject, TutoringBond, Session, Enrollment, Notification)
 - [x] Repositories criados para todas as entidades
-- [x] SubjectService completo (suggestSubject, approveSubject, rejectSubject), com exceções customizadas e validação de estado
-- [x] SubjectController completo (POST /subjects, PUT /subjects/{id}/approve, PUT /subjects/{id}/reject), com DTOs (records)
-- [ ] Testar o fluxo completo de Subject via HTTP Client
-- [ ] Services e Controllers das demais entidades (TutoringBond, Session, Enrollment, Notification), incluindo cascatas
+- [x] Fluxo de Subject completo (Service + Controller + tratamento de erros) — testado via HTTP Client e mesclado na main
+- [x] GlobalExceptionHandler centralizando o tratamento de exceções com códigos HTTP apropriados (404, 409)
+- [ ] TutoringBondService em andamento: requestTutoringBond pronto (com query method customizada e validação de vínculo duplicado); approveTutoringBond, rejectTutoringBond, revokeTutoringBond pendentes
+- [ ] Controller de TutoringBond
+- [ ] Services e Controllers das demais entidades (Session, Enrollment, Notification), incluindo cascatas
 - [ ] Segurança/autenticação (para extrair o usuário logado em vez de recebê-lo no corpo da requisição)
 - [ ] Testes automatizados
+- [ ] Corrigir exposição de dados sensíveis nas respostas da API (senha aparecendo em objetos aninhados; será resolvido com DTOs de resposta)
 
 ## Stack de infraestrutura
 
