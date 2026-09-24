@@ -1,8 +1,6 @@
 package com.joaoguilherme.tutoringmanagementsystem.service;
 
-import com.joaoguilherme.tutoringmanagementsystem.exception.SubjectNotFoundException;
-import com.joaoguilherme.tutoringmanagementsystem.exception.TutoringBondAlreadyExistsException;
-import com.joaoguilherme.tutoringmanagementsystem.exception.UserNotFoundException;
+import com.joaoguilherme.tutoringmanagementsystem.exception.*;
 import com.joaoguilherme.tutoringmanagementsystem.model.Subject;
 import com.joaoguilherme.tutoringmanagementsystem.model.TutoringBond;
 import com.joaoguilherme.tutoringmanagementsystem.model.User;
@@ -24,7 +22,7 @@ public class TutoringBondService {
     private final SubjectRepository subjectRepository;
     private final UserRepository userRepository;
 
-    public TutoringBond requestTutoringBond (UUID subjectUuid, UUID requesterUuid) {
+    public TutoringBond requestTutoringBond(UUID subjectUuid, UUID requesterUuid) {
         Subject subject = subjectRepository.findById(subjectUuid).orElseThrow(() -> new SubjectNotFoundException("Subject not found"));
 
         User requester = userRepository.findById(requesterUuid).orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -36,6 +34,55 @@ public class TutoringBondService {
         }
 
         TutoringBond tutoringBond = new TutoringBond(requester, subject);
+
+        return tutoringBondRepository.save(tutoringBond);
+
+    }
+
+    public TutoringBond approveTutoringBond(UUID tutoringBondUuid, UUID evaluatorUuid) {
+
+        TutoringBond tutoringBond = tutoringBondRepository.findById(tutoringBondUuid).orElseThrow(() -> new TutoringBondNotFoundException("TutoringBond not found"));
+
+        User evaluator = userRepository.findById(evaluatorUuid).orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        if (tutoringBond.getStatus() != BondStatus.PENDING) {
+            throw new InvalidTutoringBondStatusException("Invalid tutoring bond status");
+        }
+
+        tutoringBond.setStatus(BondStatus.APPROVED);
+        tutoringBond.setEvaluator(evaluator);
+
+        return tutoringBondRepository.save(tutoringBond);
+    }
+
+    public TutoringBond rejectTutoringBond(UUID tutoringBondUuid, UUID evaluatorUuid) {
+
+        TutoringBond tutoringBond = tutoringBondRepository.findById(tutoringBondUuid).orElseThrow(() -> new TutoringBondNotFoundException("TutoringBond not found"));
+
+        User evaluator = userRepository.findById(evaluatorUuid).orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        if (tutoringBond.getStatus() != BondStatus.PENDING) {
+            throw new InvalidTutoringBondStatusException("Invalid tutoring bond status");
+        }
+
+        tutoringBond.setStatus(BondStatus.REJECTED);
+        tutoringBond.setEvaluator(evaluator);
+
+        return tutoringBondRepository.save(tutoringBond);
+    }
+
+    public TutoringBond revokeTutoringBond(UUID tutoringBondUuid, UUID evaluatorUuid) {
+
+        TutoringBond tutoringBond = tutoringBondRepository.findById(tutoringBondUuid).orElseThrow(() -> new TutoringBondNotFoundException("TutoringBond not found"));
+
+        User evaluator = userRepository.findById(evaluatorUuid).orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        if (tutoringBond.getStatus() != BondStatus.APPROVED) {
+            throw new InvalidTutoringBondStatusException("Invalid tutoring bond status");
+        }
+
+        tutoringBond.setStatus(BondStatus.REVOKED);
+        tutoringBond.setEvaluator(evaluator);
 
         return tutoringBondRepository.save(tutoringBond);
 
