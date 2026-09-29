@@ -21,13 +21,13 @@ public class SubjectController {
         return subjectService.suggestSubject(request.userUuid(), request.subjectName());
     }
 
-    @PutMapping ("/{subjectUuid}/approve")
+    @PatchMapping ("/{subjectUuid}/approve")
     public Subject approveSubject (@PathVariable UUID subjectUuid, @RequestBody AdminActionRequest request) {
 
         return subjectService.approveSubject(request.adminUuid(), subjectUuid);
     }
 
-    @PutMapping ("/{subjectUuid}/reject")
+    @PatchMapping ("/{subjectUuid}/reject")
     public Subject rejectSubject (@PathVariable UUID subjectUuid, @RequestBody AdminActionRequest request) {
 
         return subjectService.rejectSubject(request.adminUuid(), subjectUuid);
