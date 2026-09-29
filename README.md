@@ -52,14 +52,17 @@ O domínio foi modelado por completo antes de qualquer linha de código. Diagram
 - [x] Repositories criados para todas as entidades
 - [x] Fluxo de Subject completo (Service + Controller + tratamento de erros) — testado via HTTP Client e mesclado na main
 - [x] GlobalExceptionHandler centralizando o tratamento de exceções com códigos HTTP apropriados (404, 409)
-- [x] TutoringBondService completo: requestTutoringBond, approveTutoringBond, rejectTutoringBond e revokeTutoringBond, com validação de status e exceções específicas (TutoringBondNotFoundException, TutoringBondAlreadyExistsException, InvalidTutoringBondStatusException)
-- [x] Esqueleto de TutoringBondServiceTest criado (JUnit 5 + Mockito, `@ExtendWith(MockitoExtension.class)`, mocks dos 3 repositories e `@InjectMocks` do service) — ainda sem nenhum caso de teste escrito
-- [ ] Testes de unidade do TutoringBondService (em andamento — próximo passo)
-- [ ] Controller de TutoringBond
+- [x] Fluxo completo de TutoringBond (Service + Controller + testes de unidade + testes HTTP) — mesclado na main:
+  - TutoringBondService: requestTutoringBond, approveTutoringBond, rejectTutoringBond e revokeTutoringBond, com validação de status e exceções específicas (TutoringBondNotFoundException, TutoringBondAlreadyExistsException, InvalidTutoringBondStatusException)
+  - 12 testes de unidade (JUnit 5 + Mockito) cobrindo sucesso e os 3 cenários de erro de cada um dos 4 métodos
+  - TutoringBondController com os 4 endpoints (POST para solicitar, PATCH para approve/reject/revoke), usando os DTOs TutoringBondRequest e AdminActionRequest
+  - Endpoints validados via HTTP Client (arquivo `tutoring-bond.http`), incluindo o cenário de erro (aprovar um bond em status inválido)
+  - Bug encontrado e corrigido durante o teste HTTP: TutoringBondNotFoundException e InvalidTutoringBondStatusException não estavam mapeadas no GlobalExceptionHandler (causavam 500 em vez de 404/409) — os testes de unidade não pegaram isso por não passarem pela camada de exception handling
 - [ ] Services e Controllers das demais entidades (Session, Enrollment, Notification), incluindo cascatas
 - [ ] Segurança/autenticação (para extrair o usuário logado em vez de recebê-lo no corpo da requisição)
 - [ ] Dockerização da aplicação (planejada para o final do projeto, junto com autenticação)
 - [ ] Corrigir exposição de dados sensíveis nas respostas da API (senha aparecendo em objetos aninhados; será resolvido com DTOs de resposta)
+- [ ] Atualizar SubjectController para usar PATCH em vez de PUT nos endpoints approve/reject, alinhando com o padrão adotado no TutoringBondController
 
 ### Convenções de processo adotadas
 
