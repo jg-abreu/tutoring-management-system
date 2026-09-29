@@ -1,0 +1,36 @@
+###
+
+POST http://localhost:8080/tutoring-bonds
+Content-Type: application/json
+
+{
+  "subjectUuid": "a4ce163a-0660-4262-9b5c-15f457fba955",
+  "requesterUuid": "899b90d5-673e-4137-abd2-1606d73f9b0e"
+}
+
+###
+
+PATCH http://localhost:8080/tutoring-bonds/6f24b73a-2d82-4ce2-8263-6f344c5d59b6/reject
+Content-Type: application/json
+
+{
+  "adminUuid": "2c53ba13-53cc-4c79-a4f2-31cfbcceb898"
+}
+
+###
+
+PATCH http://localhost:8080/tutoring-bonds/6f24b73a-2d82-4ce2-8263-6f344c5d59b6/approve
+Content-Type: application/json
+
+{
+  "adminUuid": "2c53ba13-53cc-4c79-a4f2-31cfbcceb898"
+}
+
+###
+
+PATCH http://localhost:8080/tutoring-bonds/e7c7f70c-8a4f-4fb6-9c3a-507927316032/revoke
+Content-Type: application/json
+
+{
+  "adminUuid": "2c53ba13-53cc-4c79-a4f2-31cfbcceb898"
+}

@@ -217,6 +217,7 @@ public class TutoringBondServiceTest {
         Assertions.assertEquals(BondStatus.REVOKED, tutoringBondTest.getStatus());
 
         Assertions.assertEquals(admin, tutoringBondTest.getEvaluator());
+
     }
 
     @Test

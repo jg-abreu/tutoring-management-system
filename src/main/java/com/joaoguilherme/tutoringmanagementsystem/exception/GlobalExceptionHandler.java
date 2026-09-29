@@ -26,4 +26,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleTutoringBondAlreadyExistsException(TutoringBondAlreadyExistsException ex){
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
+
+    @ExceptionHandler(TutoringBondNotFoundException.class)
+    public ResponseEntity<String> handleTutoringBondNotFoundException(TutoringBondNotFoundException ex){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidTutoringBondStatusException.class)
+    public ResponseEntity<String> handleInvalidTutoringBondStatusException(InvalidTutoringBondStatusException ex){
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
 }
