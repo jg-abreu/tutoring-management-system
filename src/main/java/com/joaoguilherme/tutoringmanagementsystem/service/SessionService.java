@@ -30,7 +30,7 @@ public class SessionService {
 
         TutoringBond tutoringBond = tutoringBondRepository.findById(tutoringBondUuid).orElseThrow(() -> new TutoringBondNotFoundException("TutoringBond not found"));
 
-        if (!((tutoringBond.getRequester().getId().equals(userId)) || (tutoringBond.getEvaluator() != null && tutoringBond.getEvaluator().getId().equals(userId)))) {
+        if (!(isRequesterOrEvaluator(tutoringBond, userId))) {
             throw new UserWithoutPermissionException("User without permission");
         }
 
@@ -41,6 +41,10 @@ public class SessionService {
         Session session = new Session(startTime, endTime, spots, allowsWaitList, tutoringBond);
 
         return sessionRepository.save(session);
+    }
+
+    private boolean isRequesterOrEvaluator(TutoringBond tutoringBond, UUID userId) {
+        return (tutoringBond.getRequester().getId().equals(userId)) || (tutoringBond.getEvaluator() != null && tutoringBond.getEvaluator().getId().equals(userId));
     }
 
 }
