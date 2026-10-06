@@ -43,6 +43,14 @@ public class Session {
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private SessionStatus status = SessionStatus.ACTIVE;
 
+    public Session(OffsetDateTime startTime, OffsetDateTime endTime, int spots, boolean allowsWaitlist, TutoringBond bond) {
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.spots = spots;
+        this.allowsWaitlist = allowsWaitlist;
+        this.bond = bond;
+    }
+
     @ManyToOne
     @JoinColumn(name = "bond_id", nullable = false)
     private TutoringBond bond;
