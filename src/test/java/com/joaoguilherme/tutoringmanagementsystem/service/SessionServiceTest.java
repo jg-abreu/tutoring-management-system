@@ -1,7 +1,9 @@
 package com.joaoguilherme.tutoringmanagementsystem.service;
 
+import com.joaoguilherme.tutoringmanagementsystem.exception.InvalidSessionStatusException;
 import com.joaoguilherme.tutoringmanagementsystem.exception.InvalidTimeException;
 import com.joaoguilherme.tutoringmanagementsystem.exception.InvalidTutoringBondStatusException;
+import com.joaoguilherme.tutoringmanagementsystem.exception.SessionNotFoundException;
 import com.joaoguilherme.tutoringmanagementsystem.exception.TutoringBondNotFoundException;
 import com.joaoguilherme.tutoringmanagementsystem.exception.UserWithoutPermissionException;
 import com.joaoguilherme.tutoringmanagementsystem.model.Session;
@@ -202,6 +204,123 @@ public class SessionServiceTest {
         when(tutoringBondRepository.findById(tutoringBondUuid)).thenReturn(Optional.of(tutoringBond));
 
         Assertions.assertThrows(InvalidTutoringBondStatusException.class, () -> sessionService.createSession(tutoringBondUuid, requester.getId(), startTime, endTime, 5, false));
+
+        verify(sessionRepository, never()).save(any(Session.class));
+    }
+
+    @Test
+    void shouldCancelSessionWhenUserIsEvaluatorAndSessionIsActive() {
+
+        UUID sessionUuid = UUID.randomUUID();
+
+        User requester = new User();
+        requester.setId(UUID.randomUUID());
+
+        User evaluator = new User();
+        evaluator.setId(UUID.randomUUID());
+
+        TutoringBond tutoringBond = new TutoringBond(requester, new Subject());
+        tutoringBond.setStatus(BondStatus.APPROVED);
+        tutoringBond.setEvaluator(evaluator);
+
+        OffsetDateTime startTime = OffsetDateTime.now().plusDays(1);
+        Session session = new Session(startTime, startTime.plusHours(2), 5, false, tutoringBond);
+        session.setId(sessionUuid);
+
+        when(sessionRepository.findById(sessionUuid)).thenReturn(Optional.of(session));
+        when(sessionRepository.save(any(Session.class))).then(returnsFirstArg());
+
+        Session sessionTest = sessionService.cancelSession(sessionUuid, evaluator.getId());
+
+        Assertions.assertEquals(SessionStatus.CANCELLED, sessionTest.getStatus());
+
+        verify(sessionRepository).save(session);
+    }
+
+    @Test
+    void shouldThrowSessionNotFoundExceptionWhenSessionDoesNotExist() {
+
+        UUID sessionUuid = UUID.randomUUID();
+
+        when(sessionRepository.findById(sessionUuid)).thenReturn(Optional.empty());
+
+        Assertions.assertThrows(SessionNotFoundException.class, () -> sessionService.cancelSession(sessionUuid, UUID.randomUUID()));
+
+        verify(sessionRepository, never()).save(any(Session.class));
+    }
+
+    @Test
+    void shouldThrowUserWithoutPermissionExceptionWhenUserIsRequester() {
+
+        UUID sessionUuid = UUID.randomUUID();
+
+        User requester = new User();
+        requester.setId(UUID.randomUUID());
+
+        User evaluator = new User();
+        evaluator.setId(UUID.randomUUID());
+
+        TutoringBond tutoringBond = new TutoringBond(requester, new Subject());
+        tutoringBond.setStatus(BondStatus.APPROVED);
+        tutoringBond.setEvaluator(evaluator);
+
+        OffsetDateTime startTime = OffsetDateTime.now().plusDays(1);
+        Session session = new Session(startTime, startTime.plusHours(2), 5, false, tutoringBond);
+        session.setId(sessionUuid);
+
+        when(sessionRepository.findById(sessionUuid)).thenReturn(Optional.of(session));
+
+        Assertions.assertThrows(UserWithoutPermissionException.class, () -> sessionService.cancelSession(sessionUuid, requester.getId()));
+
+        Assertions.assertEquals(SessionStatus.ACTIVE, session.getStatus());
+
+        verify(sessionRepository, never()).save(any(Session.class));
+    }
+
+    @Test
+    void shouldThrowUserWithoutPermissionExceptionWhenBondHasNoEvaluator() {
+
+        UUID sessionUuid = UUID.randomUUID();
+
+        User requester = new User();
+        requester.setId(UUID.randomUUID());
+
+        TutoringBond tutoringBond = new TutoringBond(requester, new Subject());
+
+        OffsetDateTime startTime = OffsetDateTime.now().plusDays(1);
+        Session session = new Session(startTime, startTime.plusHours(2), 5, false, tutoringBond);
+        session.setId(sessionUuid);
+
+        when(sessionRepository.findById(sessionUuid)).thenReturn(Optional.of(session));
+
+        Assertions.assertThrows(UserWithoutPermissionException.class, () -> sessionService.cancelSession(sessionUuid, UUID.randomUUID()));
+
+        verify(sessionRepository, never()).save(any(Session.class));
+    }
+
+    @Test
+    void shouldThrowInvalidSessionStatusExceptionWhenSessionIsAlreadyCancelled() {
+
+        UUID sessionUuid = UUID.randomUUID();
+
+        User requester = new User();
+        requester.setId(UUID.randomUUID());
+
+        User evaluator = new User();
+        evaluator.setId(UUID.randomUUID());
+
+        TutoringBond tutoringBond = new TutoringBond(requester, new Subject());
+        tutoringBond.setStatus(BondStatus.APPROVED);
+        tutoringBond.setEvaluator(evaluator);
+
+        OffsetDateTime startTime = OffsetDateTime.now().plusDays(1);
+        Session session = new Session(startTime, startTime.plusHours(2), 5, false, tutoringBond);
+        session.setId(sessionUuid);
+        session.setStatus(SessionStatus.CANCELLED);
+
+        when(sessionRepository.findById(sessionUuid)).thenReturn(Optional.of(session));
+
+        Assertions.assertThrows(InvalidSessionStatusException.class, () -> sessionService.cancelSession(sessionUuid, evaluator.getId()));
 
         verify(sessionRepository, never()).save(any(Session.class));
     }
