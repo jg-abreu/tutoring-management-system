@@ -40,7 +40,7 @@ O domínio foi modelado por completo antes de qualquer linha de código. Diagram
 
 ## Status atual
 
-🚧 Em desenvolvimento.
+🚧 Em desenvolvimento — rumo à versão 1.0.
 
 - [x] Modelagem de domínio completa (diagramas ER, classes, fluxos de negócio)
 - [x] Schema de banco de dados desenhado e documentado
@@ -51,18 +51,22 @@ O domínio foi modelado por completo antes de qualquer linha de código. Diagram
 - [x] Todas as 6 entidades JPA mapeadas e validadas contra o schema (User, Subject, TutoringBond, Session, Enrollment, Notification)
 - [x] Repositories criados para todas as entidades
 - [x] Fluxo de Subject completo (Service + Controller + tratamento de erros) — testado via HTTP Client e mesclado na main
-- [x] GlobalExceptionHandler centralizando o tratamento de exceções com códigos HTTP apropriados (404, 409)
-- [x] Fluxo completo de TutoringBond (Service + Controller + testes de unidade + testes HTTP) — mesclado na main:
-  - TutoringBondService: requestTutoringBond, approveTutoringBond, rejectTutoringBond e revokeTutoringBond, com validação de status e exceções específicas (TutoringBondNotFoundException, TutoringBondAlreadyExistsException, InvalidTutoringBondStatusException)
-  - 12 testes de unidade (JUnit 5 + Mockito) cobrindo sucesso e os 3 cenários de erro de cada um dos 4 métodos
-  - TutoringBondController com os 4 endpoints (POST para solicitar, PATCH para approve/reject/revoke), usando os DTOs TutoringBondRequest e AdminActionRequest
-  - Endpoints validados via HTTP Client (arquivo `tutoring-bond.http`), incluindo o cenário de erro (aprovar um bond em status inválido)
-  - Bug encontrado e corrigido durante o teste HTTP: TutoringBondNotFoundException e InvalidTutoringBondStatusException não estavam mapeadas no GlobalExceptionHandler (causavam 500 em vez de 404/409) — os testes de unidade não pegaram isso por não passarem pela camada de exception handling
-- [ ] Services e Controllers das demais entidades (Session, Enrollment, Notification), incluindo cascatas
+- [x] GlobalExceptionHandler centralizando o tratamento de exceções com códigos HTTP apropriados
+- [x] TutoringBondService completo: requestTutoringBond, approveTutoringBond, rejectTutoringBond e revokeTutoringBond, com validação de status e exceções específicas (TutoringBondNotFoundException, TutoringBondAlreadyExistsException, InvalidTutoringBondStatusException)
+- [x] Testes de unidade do TutoringBondService (JUnit 5 + Mockito, `@ExtendWith(MockitoExtension.class)`, nomes de teste em inglês no padrão `should...When...`), cobrindo cenários de sucesso e de erro de approve, reject e revoke
+- [x] Controller de TutoringBond, com exceções mapeadas no GlobalExceptionHandler
+- [x] Exceções de Session e Enrollment criadas e mapeadas com códigos HTTP apropriados (400, 403, 404, 409): SessionNotFoundException, EnrollmentNotFoundException, SessionFullException, EnrollmentAlreadyExistsException, InvalidSessionStatusException, InvalidEnrollmentStatusException, UserWithoutPermissionException, InvalidTimeException
+- [x] SessionService iniciado: `createSession` implementado (valida horário de fim após o início antes de consultar o banco, exige vínculo APPROVED, cria a sessão via construtor da entidade)
+- [ ] Testes de unidade do `createSession` (próximo passo)
+- [ ] `cancelSession` (apenas o avaliador do vínculo) + testes
+- [ ] Cascata de revogação: revogar um vínculo cancela suas sessões futuras
+- [ ] `enroll` (bloqueio de duplicidade, confirmação ou lista de espera, sessão lotada) + testes
+- [ ] `cancelEnrollment` (promoção automática da lista de espera, reordenação da fila e notificação ao promovido) + testes
+- [ ] Controller de Session/Enrollment
+- [ ] Fechamento da versão 1.0
 - [ ] Segurança/autenticação (para extrair o usuário logado em vez de recebê-lo no corpo da requisição)
 - [ ] Dockerização da aplicação (planejada para o final do projeto, junto com autenticação)
 - [ ] Corrigir exposição de dados sensíveis nas respostas da API (senha aparecendo em objetos aninhados; será resolvido com DTOs de resposta)
-- [ ] Atualizar SubjectController para usar PATCH em vez de PUT nos endpoints approve/reject, alinhando com o padrão adotado no TutoringBondController
 
 ### Convenções de processo adotadas
 
