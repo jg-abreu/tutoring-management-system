@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -55,6 +56,17 @@ public class SessionService {
         session.setStatus(SessionStatus.CANCELLED);
         return sessionRepository.save(session);
 
+    }
+
+    public List<Session> cancelFutureSessions(TutoringBond tutoringBond) {
+
+        OffsetDateTime presentMoment = OffsetDateTime.now();
+
+        List<Session> futureSessions = sessionRepository.findByBondAndStatusAndStartTimeAfter(tutoringBond, SessionStatus.ACTIVE, presentMoment);
+
+        futureSessions.forEach(s -> s.setStatus(SessionStatus.CANCELLED));
+
+        return sessionRepository.saveAll(futureSessions);
     }
 
     private boolean isRequesterOrEvaluator(TutoringBond tutoringBond, UUID userId) {

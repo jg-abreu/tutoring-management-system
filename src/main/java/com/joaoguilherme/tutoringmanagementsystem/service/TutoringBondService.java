@@ -10,6 +10,7 @@ import com.joaoguilherme.tutoringmanagementsystem.repository.TutoringBondReposit
 import com.joaoguilherme.tutoringmanagementsystem.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +22,7 @@ public class TutoringBondService {
     private final TutoringBondRepository tutoringBondRepository;
     private final SubjectRepository subjectRepository;
     private final UserRepository userRepository;
+    private final SessionService sessionService;
 
     public TutoringBond requestTutoringBond(UUID subjectUuid, UUID requesterUuid) {
         Subject subject = subjectRepository.findById(subjectUuid).orElseThrow(() -> new SubjectNotFoundException("Subject not found"));
@@ -71,6 +73,7 @@ public class TutoringBondService {
         return tutoringBondRepository.save(tutoringBond);
     }
 
+    @Transactional
     public TutoringBond revokeTutoringBond(UUID tutoringBondUuid, UUID evaluatorUuid) {
 
         TutoringBond tutoringBond = tutoringBondRepository.findById(tutoringBondUuid).orElseThrow(() -> new TutoringBondNotFoundException("TutoringBond not found"));
@@ -83,6 +86,7 @@ public class TutoringBondService {
 
         tutoringBond.setStatus(BondStatus.REVOKED);
         tutoringBond.setEvaluator(evaluator);
+        sessionService.cancelFutureSessions(tutoringBond);
 
         return tutoringBondRepository.save(tutoringBond);
 
