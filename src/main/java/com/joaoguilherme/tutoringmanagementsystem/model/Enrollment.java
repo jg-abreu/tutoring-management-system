@@ -50,4 +50,9 @@ public class Enrollment {
         this.createdAt = OffsetDateTime.now();
     }
 
+    public Enrollment(EnrollmentStatus status, Session session, User student) {
+        this.status = status;
+        this.session = session;
+        this.student = student;
+    }
 }

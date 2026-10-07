@@ -5,8 +5,10 @@ import com.joaoguilherme.tutoringmanagementsystem.model.Session;
 import com.joaoguilherme.tutoringmanagementsystem.model.TutoringBond;
 import com.joaoguilherme.tutoringmanagementsystem.model.enums.BondStatus;
 import com.joaoguilherme.tutoringmanagementsystem.model.enums.SessionStatus;
+import com.joaoguilherme.tutoringmanagementsystem.repository.EnrollmentRepository;
 import com.joaoguilherme.tutoringmanagementsystem.repository.SessionRepository;
 import com.joaoguilherme.tutoringmanagementsystem.repository.TutoringBondRepository;
+import com.joaoguilherme.tutoringmanagementsystem.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,8 @@ public class SessionService {
 
     private final TutoringBondRepository tutoringBondRepository;
     private final SessionRepository sessionRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final UserRepository userRepository;
 
     public Session createSession(UUID tutoringBondUuid, UUID userId, OffsetDateTime startTime, OffsetDateTime endTime, int spots, boolean allowsWaitList) {
 
