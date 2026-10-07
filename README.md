@@ -56,17 +56,18 @@ O domínio foi modelado por completo antes de qualquer linha de código. Diagram
 - [x] Testes de unidade do TutoringBondService (JUnit 5 + Mockito, `@ExtendWith(MockitoExtension.class)`, nomes de teste em inglês no padrão `should...When...`), cobrindo cenários de sucesso e de erro de approve, reject e revoke
 - [x] Controller de TutoringBond, com exceções mapeadas no GlobalExceptionHandler
 - [x] Exceções de Session e Enrollment criadas e mapeadas com códigos HTTP apropriados (400, 403, 404, 409): SessionNotFoundException, EnrollmentNotFoundException, SessionFullException, EnrollmentAlreadyExistsException, InvalidSessionStatusException, InvalidEnrollmentStatusException, UserWithoutPermissionException, InvalidTimeException
-- [x] SessionService iniciado: `createSession` implementado (valida horário de fim após o início antes de consultar o banco, exige vínculo APPROVED, cria a sessão via construtor da entidade)
-- [ ] Testes de unidade do `createSession` (próximo passo)
-- [ ] `cancelSession` (apenas o avaliador do vínculo) + testes
-- [ ] Cascata de revogação: revogar um vínculo cancela suas sessões futuras
-- [ ] `enroll` (bloqueio de duplicidade, confirmação ou lista de espera, sessão lotada) + testes
+- [x] SessionService iniciado: `createSession` implementado (valida horário de fim após o início antes de consultar o banco, exige vínculo APPROVED, restrito ao requester ou evaluator do vínculo, cria a sessão via construtor da entidade)
+- [x] Testes de unidade do `createSession`
+- [x] `cancelSession` (apenas o avaliador do vínculo) + testes
+- [x] Cascata de revogação: revogar um vínculo cancela suas sessões futuras e ativas (`cancelFutureSessions` com derived query, `revokeTutoringBond` transacional) + testes
+- [ ] `enroll` (bloqueio de duplicidade, confirmação ou lista de espera, sessão lotada) + testes — em andamento: construtor de `Enrollment` e queries do `EnrollmentRepository` prontos; falta o método no service
 - [ ] `cancelEnrollment` (promoção automática da lista de espera, reordenação da fila e notificação ao promovido) + testes
-- [ ] Controller de Session/Enrollment
+- [ ] Controller de Session/Enrollment + arquivo `.http`
 - [ ] Fechamento da versão 1.0
-- [ ] Segurança/autenticação (para extrair o usuário logado em vez de recebê-lo no corpo da requisição)
-- [ ] Dockerização da aplicação (planejada para o final do projeto, junto com autenticação)
-- [ ] Corrigir exposição de dados sensíveis nas respostas da API (senha aparecendo em objetos aninhados; será resolvido com DTOs de resposta)
+- [ ] Segurança/autenticação (para extrair o usuário logado em vez de recebê-lo no corpo da requisição) — v2.0
+- [ ] Dockerização da aplicação (planejada para o final do projeto, junto com autenticação) — v2.0
+- [ ] Corrigir exposição de dados sensíveis nas respostas da API (senha aparecendo em objetos aninhados; será resolvido com DTOs de resposta) — v2.0
+- [ ] Concorrência na matrícula: dois alunos disputando a última vaga ao mesmo tempo podem ser confirmados juntos (exige lock no banco) — v2.0
 
 ### Convenções de processo adotadas
 
