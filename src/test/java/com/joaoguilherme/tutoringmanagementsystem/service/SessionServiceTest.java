@@ -17,16 +17,19 @@ import com.joaoguilherme.tutoringmanagementsystem.repository.TutoringBondReposit
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -323,6 +326,60 @@ public class SessionServiceTest {
         Assertions.assertThrows(InvalidSessionStatusException.class, () -> sessionService.cancelSession(sessionUuid, evaluator.getId()));
 
         verify(sessionRepository, never()).save(any(Session.class));
+    }
+
+    @Test
+    void shouldCancelFutureActiveSessionsWhenBondHasSessions() {
+
+        TutoringBond tutoringBond = new TutoringBond(new User(), new Subject());
+        tutoringBond.setStatus(BondStatus.APPROVED);
+
+        OffsetDateTime startTime = OffsetDateTime.now().plusDays(1);
+        Session firstSession = new Session(startTime, startTime.plusHours(2), 5, false, tutoringBond);
+        Session secondSession = new Session(startTime.plusDays(7), startTime.plusDays(7).plusHours(2), 5, false, tutoringBond);
+        List<Session> futureSessions = List.of(firstSession, secondSession);
+
+        when(sessionRepository.findByBondAndStatusAndStartTimeAfter(eq(tutoringBond), eq(SessionStatus.ACTIVE), any(OffsetDateTime.class))).thenReturn(futureSessions);
+        when(sessionRepository.saveAll(futureSessions)).thenReturn(futureSessions);
+
+        List<Session> cancelledSessions = sessionService.cancelFutureSessions(tutoringBond);
+
+        Assertions.assertEquals(2, cancelledSessions.size());
+        Assertions.assertEquals(SessionStatus.CANCELLED, firstSession.getStatus());
+        Assertions.assertEquals(SessionStatus.CANCELLED, secondSession.getStatus());
+
+        verify(sessionRepository).saveAll(futureSessions);
+    }
+
+    @Test
+    void shouldQueryOnlyActiveSessionsWhenCancellingFutureSessions() {
+
+        TutoringBond tutoringBond = new TutoringBond(new User(), new Subject());
+
+        OffsetDateTime before = OffsetDateTime.now();
+
+        sessionService.cancelFutureSessions(tutoringBond);
+
+        OffsetDateTime after = OffsetDateTime.now();
+
+        ArgumentCaptor<OffsetDateTime> referenceTime = ArgumentCaptor.forClass(OffsetDateTime.class);
+        verify(sessionRepository).findByBondAndStatusAndStartTimeAfter(eq(tutoringBond), eq(SessionStatus.ACTIVE), referenceTime.capture());
+
+        Assertions.assertFalse(referenceTime.getValue().isBefore(before));
+        Assertions.assertFalse(referenceTime.getValue().isAfter(after));
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenBondHasNoFutureSessions() {
+
+        TutoringBond tutoringBond = new TutoringBond(new User(), new Subject());
+
+        when(sessionRepository.findByBondAndStatusAndStartTimeAfter(eq(tutoringBond), eq(SessionStatus.ACTIVE), any(OffsetDateTime.class))).thenReturn(List.of());
+        when(sessionRepository.saveAll(List.<Session>of())).thenReturn(List.of());
+
+        List<Session> cancelledSessions = sessionService.cancelFutureSessions(tutoringBond);
+
+        Assertions.assertTrue(cancelledSessions.isEmpty());
     }
 
 }

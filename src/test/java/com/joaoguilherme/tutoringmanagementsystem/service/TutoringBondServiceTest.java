@@ -21,6 +21,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +36,9 @@ public class TutoringBondServiceTest {
 
     @Mock
     private SubjectRepository subjectRepository;
+
+    @Mock
+    private SessionService sessionService;
 
     @InjectMocks
     private TutoringBondService tutoringBondService;
@@ -264,6 +269,47 @@ public class TutoringBondServiceTest {
 
         Assertions.assertThrows(InvalidTutoringBondStatusException.class, () -> tutoringBondService.revokeTutoringBond(tutoringBondUuid, admin.getId()));
 
+    }
+
+    @Test
+    void shouldCancelFutureSessionsWhenTutoringBondIsRevoked() {
+
+        UUID tutoringBondUuid = UUID.randomUUID();
+
+        TutoringBond tutoringBond = new TutoringBond(new User(), new Subject());
+        tutoringBond.setId(tutoringBondUuid);
+        tutoringBond.setStatus(BondStatus.APPROVED);
+
+        User admin = new User();
+        admin.setId(UUID.randomUUID());
+
+        when(tutoringBondRepository.findById(tutoringBondUuid)).thenReturn(Optional.of(tutoringBond));
+        when(userRepository.findById(admin.getId())).thenReturn(Optional.of(admin));
+        when(tutoringBondRepository.save(any(TutoringBond.class))).thenReturn(tutoringBond);
+
+        tutoringBondService.revokeTutoringBond(tutoringBondUuid, admin.getId());
+
+        verify(sessionService).cancelFutureSessions(tutoringBond);
+    }
+
+    @Test
+    void shouldNotCancelSessionsWhenTutoringBondIsNotApproved() {
+
+        UUID tutoringBondUuid = UUID.randomUUID();
+
+        TutoringBond tutoringBond = new TutoringBond(new User(), new Subject());
+        tutoringBond.setId(tutoringBondUuid);
+        tutoringBond.setStatus(BondStatus.PENDING);
+
+        User admin = new User();
+        admin.setId(UUID.randomUUID());
+
+        when(tutoringBondRepository.findById(tutoringBondUuid)).thenReturn(Optional.of(tutoringBond));
+        when(userRepository.findById(admin.getId())).thenReturn(Optional.of(admin));
+
+        Assertions.assertThrows(InvalidTutoringBondStatusException.class, () -> tutoringBondService.revokeTutoringBond(tutoringBondUuid, admin.getId()));
+
+        verifyNoInteractions(sessionService);
     }
 
 }
