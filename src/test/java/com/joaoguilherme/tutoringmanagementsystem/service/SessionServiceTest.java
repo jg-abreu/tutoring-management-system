@@ -1,6 +1,8 @@
 package com.joaoguilherme.tutoringmanagementsystem.service;
 
 import com.joaoguilherme.tutoringmanagementsystem.exception.EnrollmentAlreadyExistsException;
+import com.joaoguilherme.tutoringmanagementsystem.exception.EnrollmentNotFoundException;
+import com.joaoguilherme.tutoringmanagementsystem.exception.InvalidEnrollmentStatusException;
 import com.joaoguilherme.tutoringmanagementsystem.exception.InvalidSessionStatusException;
 import com.joaoguilherme.tutoringmanagementsystem.exception.InvalidTimeException;
 import com.joaoguilherme.tutoringmanagementsystem.exception.InvalidTutoringBondStatusException;
@@ -10,14 +12,17 @@ import com.joaoguilherme.tutoringmanagementsystem.exception.TutoringBondNotFound
 import com.joaoguilherme.tutoringmanagementsystem.exception.UserNotFoundException;
 import com.joaoguilherme.tutoringmanagementsystem.exception.UserWithoutPermissionException;
 import com.joaoguilherme.tutoringmanagementsystem.model.Enrollment;
+import com.joaoguilherme.tutoringmanagementsystem.model.Notification;
 import com.joaoguilherme.tutoringmanagementsystem.model.Session;
 import com.joaoguilherme.tutoringmanagementsystem.model.Subject;
 import com.joaoguilherme.tutoringmanagementsystem.model.TutoringBond;
 import com.joaoguilherme.tutoringmanagementsystem.model.User;
 import com.joaoguilherme.tutoringmanagementsystem.model.enums.BondStatus;
 import com.joaoguilherme.tutoringmanagementsystem.model.enums.EnrollmentStatus;
+import com.joaoguilherme.tutoringmanagementsystem.model.enums.NotificationEventType;
 import com.joaoguilherme.tutoringmanagementsystem.model.enums.SessionStatus;
 import com.joaoguilherme.tutoringmanagementsystem.repository.EnrollmentRepository;
+import com.joaoguilherme.tutoringmanagementsystem.repository.NotificationRepository;
 import com.joaoguilherme.tutoringmanagementsystem.repository.SessionRepository;
 import com.joaoguilherme.tutoringmanagementsystem.repository.TutoringBondRepository;
 import com.joaoguilherme.tutoringmanagementsystem.repository.UserRepository;
@@ -56,6 +61,9 @@ public class SessionServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private NotificationRepository notificationRepository;
 
     @InjectMocks
     private SessionService sessionService;
@@ -545,6 +553,180 @@ public class SessionServiceTest {
         Assertions.assertThrows(EnrollmentAlreadyExistsException.class, () -> sessionService.enroll(sessionUuid, student.getId()));
 
         verify(enrollmentRepository, never()).save(any(Enrollment.class));
+    }
+
+    @Test
+    void shouldPromoteFirstWaitlistedWhenConfirmedEnrollmentIsCancelled() {
+
+        UUID enrollmentUuid = UUID.randomUUID();
+
+        User student = new User();
+        student.setId(UUID.randomUUID());
+
+        User promotedStudent = new User();
+        promotedStudent.setId(UUID.randomUUID());
+
+        OffsetDateTime startTime = OffsetDateTime.now().plusDays(1);
+        Session session = new Session(startTime, startTime.plusHours(2), 2, true, new TutoringBond(new User(), new Subject()));
+
+        Enrollment enrollment = new Enrollment(EnrollmentStatus.CONFIRMED, session, student);
+        enrollment.setId(enrollmentUuid);
+
+        Enrollment firstWaiting = new Enrollment(EnrollmentStatus.WAITLISTED, session, promotedStudent);
+        firstWaiting.setQueuePosition(1);
+        Enrollment secondWaiting = new Enrollment(EnrollmentStatus.WAITLISTED, session, new User());
+        secondWaiting.setQueuePosition(2);
+        Enrollment thirdWaiting = new Enrollment(EnrollmentStatus.WAITLISTED, session, new User());
+        thirdWaiting.setQueuePosition(3);
+        List<Enrollment> waitlist = List.of(firstWaiting, secondWaiting, thirdWaiting);
+
+        when(enrollmentRepository.findById(enrollmentUuid)).thenReturn(Optional.of(enrollment));
+        when(enrollmentRepository.findBySessionAndStatusOrderByQueuePositionAsc(session, EnrollmentStatus.WAITLISTED)).thenReturn(waitlist);
+        when(enrollmentRepository.save(any(Enrollment.class))).then(returnsFirstArg());
+
+        Enrollment enrollmentTest = sessionService.cancelEnrollment(enrollmentUuid, student.getId());
+
+        Assertions.assertEquals(EnrollmentStatus.CANCELLED, enrollmentTest.getStatus());
+        Assertions.assertNull(enrollmentTest.getQueuePosition());
+
+        Assertions.assertEquals(EnrollmentStatus.CONFIRMED, firstWaiting.getStatus());
+        Assertions.assertNull(firstWaiting.getQueuePosition());
+        Assertions.assertEquals(1, secondWaiting.getQueuePosition());
+        Assertions.assertEquals(2, thirdWaiting.getQueuePosition());
+
+        ArgumentCaptor<Notification> notification = ArgumentCaptor.forClass(Notification.class);
+        verify(notificationRepository).save(notification.capture());
+
+        Assertions.assertEquals(NotificationEventType.SPOT_PROMOTED, notification.getValue().getEventType());
+        Assertions.assertEquals(promotedStudent, notification.getValue().getReceiver());
+
+        verify(enrollmentRepository).saveAll(waitlist);
+        verify(enrollmentRepository).save(enrollment);
+    }
+
+    @Test
+    void shouldCancelConfirmedEnrollmentWithoutPromotionWhenWaitlistIsEmpty() {
+
+        UUID enrollmentUuid = UUID.randomUUID();
+
+        User student = new User();
+        student.setId(UUID.randomUUID());
+
+        OffsetDateTime startTime = OffsetDateTime.now().plusDays(1);
+        Session session = new Session(startTime, startTime.plusHours(2), 2, true, new TutoringBond(new User(), new Subject()));
+
+        Enrollment enrollment = new Enrollment(EnrollmentStatus.CONFIRMED, session, student);
+        enrollment.setId(enrollmentUuid);
+
+        when(enrollmentRepository.findById(enrollmentUuid)).thenReturn(Optional.of(enrollment));
+        when(enrollmentRepository.findBySessionAndStatusOrderByQueuePositionAsc(session, EnrollmentStatus.WAITLISTED)).thenReturn(List.of());
+        when(enrollmentRepository.save(any(Enrollment.class))).then(returnsFirstArg());
+
+        Enrollment enrollmentTest = sessionService.cancelEnrollment(enrollmentUuid, student.getId());
+
+        Assertions.assertEquals(EnrollmentStatus.CANCELLED, enrollmentTest.getStatus());
+
+        verifyNoInteractions(notificationRepository);
+        verify(enrollmentRepository).save(enrollment);
+    }
+
+    @Test
+    void shouldReorderWaitlistWhenWaitlistedEnrollmentIsCancelled() {
+
+        UUID enrollmentUuid = UUID.randomUUID();
+
+        User student = new User();
+        student.setId(UUID.randomUUID());
+
+        OffsetDateTime startTime = OffsetDateTime.now().plusDays(1);
+        Session session = new Session(startTime, startTime.plusHours(2), 2, true, new TutoringBond(new User(), new Subject()));
+
+        Enrollment enrollment = new Enrollment(EnrollmentStatus.WAITLISTED, session, student);
+        enrollment.setId(enrollmentUuid);
+        enrollment.setQueuePosition(1);
+
+        Enrollment secondWaiting = new Enrollment(EnrollmentStatus.WAITLISTED, session, new User());
+        secondWaiting.setQueuePosition(2);
+        Enrollment thirdWaiting = new Enrollment(EnrollmentStatus.WAITLISTED, session, new User());
+        thirdWaiting.setQueuePosition(3);
+        List<Enrollment> waitlist = List.of(secondWaiting, thirdWaiting);
+
+        when(enrollmentRepository.findById(enrollmentUuid)).thenReturn(Optional.of(enrollment));
+        when(enrollmentRepository.findBySessionAndStatusOrderByQueuePositionAsc(session, EnrollmentStatus.WAITLISTED)).thenReturn(waitlist);
+        when(enrollmentRepository.save(any(Enrollment.class))).then(returnsFirstArg());
+
+        Enrollment enrollmentTest = sessionService.cancelEnrollment(enrollmentUuid, student.getId());
+
+        Assertions.assertEquals(EnrollmentStatus.CANCELLED, enrollmentTest.getStatus());
+        Assertions.assertNull(enrollmentTest.getQueuePosition());
+
+        Assertions.assertEquals(EnrollmentStatus.WAITLISTED, secondWaiting.getStatus());
+        Assertions.assertEquals(1, secondWaiting.getQueuePosition());
+        Assertions.assertEquals(EnrollmentStatus.WAITLISTED, thirdWaiting.getStatus());
+        Assertions.assertEquals(2, thirdWaiting.getQueuePosition());
+
+        verifyNoInteractions(notificationRepository);
+        verify(enrollmentRepository).saveAll(waitlist);
+    }
+
+    @Test
+    void shouldThrowEnrollmentNotFoundExceptionWhenEnrollmentDoesNotExist() {
+
+        UUID enrollmentUuid = UUID.randomUUID();
+
+        when(enrollmentRepository.findById(enrollmentUuid)).thenReturn(Optional.empty());
+
+        Assertions.assertThrows(EnrollmentNotFoundException.class, () -> sessionService.cancelEnrollment(enrollmentUuid, UUID.randomUUID()));
+
+        verify(enrollmentRepository, never()).save(any(Enrollment.class));
+        verifyNoInteractions(notificationRepository);
+    }
+
+    @Test
+    void shouldThrowUserWithoutPermissionExceptionWhenUserIsNotEnrollmentStudent() {
+
+        UUID enrollmentUuid = UUID.randomUUID();
+
+        User student = new User();
+        student.setId(UUID.randomUUID());
+
+        OffsetDateTime startTime = OffsetDateTime.now().plusDays(1);
+        Session session = new Session(startTime, startTime.plusHours(2), 2, true, new TutoringBond(new User(), new Subject()));
+
+        Enrollment enrollment = new Enrollment(EnrollmentStatus.CONFIRMED, session, student);
+        enrollment.setId(enrollmentUuid);
+
+        when(enrollmentRepository.findById(enrollmentUuid)).thenReturn(Optional.of(enrollment));
+
+        Assertions.assertThrows(UserWithoutPermissionException.class, () -> sessionService.cancelEnrollment(enrollmentUuid, UUID.randomUUID()));
+
+        Assertions.assertEquals(EnrollmentStatus.CONFIRMED, enrollment.getStatus());
+
+        verify(enrollmentRepository, never()).save(any(Enrollment.class));
+        verifyNoInteractions(notificationRepository);
+    }
+
+    @Test
+    void shouldThrowInvalidEnrollmentStatusExceptionWhenEnrollmentIsAlreadyCancelled() {
+
+        UUID enrollmentUuid = UUID.randomUUID();
+
+        User student = new User();
+        student.setId(UUID.randomUUID());
+
+        OffsetDateTime startTime = OffsetDateTime.now().plusDays(1);
+        Session session = new Session(startTime, startTime.plusHours(2), 2, true, new TutoringBond(new User(), new Subject()));
+
+        Enrollment enrollment = new Enrollment(EnrollmentStatus.CANCELLED, session, student);
+        enrollment.setId(enrollmentUuid);
+
+        when(enrollmentRepository.findById(enrollmentUuid)).thenReturn(Optional.of(enrollment));
+
+        Assertions.assertThrows(InvalidEnrollmentStatusException.class, () -> sessionService.cancelEnrollment(enrollmentUuid, student.getId()));
+
+        verify(enrollmentRepository, never()).findBySessionAndStatusOrderByQueuePositionAsc(any(Session.class), any(EnrollmentStatus.class));
+        verify(enrollmentRepository, never()).save(any(Enrollment.class));
+        verifyNoInteractions(notificationRepository);
     }
 
 }
