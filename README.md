@@ -60,14 +60,15 @@ O domínio foi modelado por completo antes de qualquer linha de código. Diagram
 - [x] Testes de unidade do `createSession`
 - [x] `cancelSession` (apenas o avaliador do vínculo) + testes
 - [x] Cascata de revogação: revogar um vínculo cancela suas sessões futuras e ativas (`cancelFutureSessions` com derived query, `revokeTutoringBond` transacional) + testes
-- [ ] `enroll` (bloqueio de duplicidade, confirmação ou lista de espera, sessão lotada) + testes — em andamento: construtor de `Enrollment` e queries do `EnrollmentRepository` prontos; falta o método no service
-- [ ] `cancelEnrollment` (promoção automática da lista de espera, reordenação da fila e notificação ao promovido) + testes
-- [ ] Controller de Session/Enrollment + arquivo `.http`
+- [x] `enroll` (bloqueio de duplicidade, confirmação ou lista de espera, sessão lotada) + testes
+- [x] `cancelEnrollment` (só o próprio aluno cancela; promoção automática do primeiro da lista de espera, reordenação da fila sem buracos e notificação `SPOT_PROMOTED` ao promovido, tudo em `@Transactional`) + testes
+- [ ] Controller de Session/Enrollment + arquivo `.http` — em andamento: DTOs de requisição e endpoint `POST /sessions` prontos
 - [ ] Fechamento da versão 1.0
 - [ ] Segurança/autenticação (para extrair o usuário logado em vez de recebê-lo no corpo da requisição) — v2.0
 - [ ] Dockerização da aplicação (planejada para o final do projeto, junto com autenticação) — v2.0
 - [ ] Corrigir exposição de dados sensíveis nas respostas da API (senha aparecendo em objetos aninhados; será resolvido com DTOs de resposta) — v2.0
 - [ ] Concorrência na matrícula: dois alunos disputando a última vaga ao mesmo tempo podem ser confirmados juntos (exige lock no banco) — v2.0
+- [ ] Papéis de usuário (admin): hoje `User` não tem papel, então as ações "de admin" não verificam nada e o cancelamento de matrícula por admin ficou de fora — v2.0
 
 ### Convenções de processo adotadas
 
