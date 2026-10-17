@@ -1,16 +1,15 @@
 package com.joaoguilherme.tutoringmanagementsystem.service;
 
 import com.joaoguilherme.tutoringmanagementsystem.exception.*;
-import com.joaoguilherme.tutoringmanagementsystem.model.Enrollment;
-import com.joaoguilherme.tutoringmanagementsystem.model.Session;
-import com.joaoguilherme.tutoringmanagementsystem.model.TutoringBond;
-import com.joaoguilherme.tutoringmanagementsystem.model.User;
+import com.joaoguilherme.tutoringmanagementsystem.model.*;
 import com.joaoguilherme.tutoringmanagementsystem.model.enums.BondStatus;
 import com.joaoguilherme.tutoringmanagementsystem.model.enums.EnrollmentStatus;
+import com.joaoguilherme.tutoringmanagementsystem.model.enums.NotificationEventType;
 import com.joaoguilherme.tutoringmanagementsystem.model.enums.SessionStatus;
 import com.joaoguilherme.tutoringmanagementsystem.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -110,6 +109,47 @@ public class SessionService {
         }
 
         throw new SessionFullException("Session is full");
+    }
+
+    @Transactional
+    public Enrollment cancelEnrollment(UUID enrollmentUuid, UUID userUuid) {
+
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentUuid).orElseThrow(() -> new EnrollmentNotFoundException("Enrollment not found"));
+
+        if (!(enrollment.getStudent().getId().equals(userUuid))) {
+            throw new UserWithoutPermissionException("User without permission");
+        }
+
+        if (enrollment.getStatus() != EnrollmentStatus.CONFIRMED && enrollment.getStatus() != EnrollmentStatus.WAITLISTED) {
+            throw new InvalidEnrollmentStatusException("Invalid enrollment status");
+        }
+
+        EnrollmentStatus previousStatus = enrollment.getStatus();
+
+        enrollment.setStatus(EnrollmentStatus.CANCELLED);
+        enrollment.setQueuePosition(null);
+
+        List<Enrollment> waitlist = enrollmentRepository.findBySessionAndStatusOrderByQueuePositionAsc(enrollment.getSession(), EnrollmentStatus.WAITLISTED);
+
+        if (previousStatus == EnrollmentStatus.CONFIRMED && !waitlist.isEmpty()) {
+            Enrollment promoted = waitlist.get(0);
+            promoted.setStatus(EnrollmentStatus.CONFIRMED);
+            promoted.setQueuePosition(null);
+            Notification notification = new Notification(NotificationEventType.SPOT_PROMOTED, "You have been promoted from the waitlist", promoted.getStudent());
+            notificationRepository.save(notification);
+        }
+
+        int position = 1;
+
+        for (Enrollment waiting : waitlist) {
+            if (waiting.getStatus() == EnrollmentStatus.WAITLISTED) {
+                waiting.setQueuePosition(position);
+                position++;
+            }
+        }
+
+        enrollmentRepository.saveAll(waitlist);
+        return enrollmentRepository.save(enrollment);
     }
 
     private boolean isRequesterOrEvaluator(TutoringBond tutoringBond, UUID userId) {
