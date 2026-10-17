@@ -14,4 +14,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, UUID> {
     boolean existsBySessionAndStudentAndStatusIn(Session session, User user, List<EnrollmentStatus> list);
 
     long countBySessionAndStatus(Session session, EnrollmentStatus enrollmentStatus);
+
+    List<Enrollment> findBySessionAndStatusOrderByQueuePositionAsc(Session session, EnrollmentStatus enrollmentStatus);
 }
