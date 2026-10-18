@@ -6,6 +6,7 @@ import com.joaoguilherme.tutoringmanagementsystem.model.Enrollment;
 import com.joaoguilherme.tutoringmanagementsystem.model.Session;
 import com.joaoguilherme.tutoringmanagementsystem.service.SessionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -18,6 +19,7 @@ public class SessionController {
     private final SessionService sessionService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Session createSession(@RequestBody SessionRequest request) {
         return sessionService.createSession(request.tutoringBondUuid(), request.userUuid(), request.startTime(), request.endTime(), request.spots(), request.allowsWaitlist());
     }
@@ -28,6 +30,7 @@ public class SessionController {
     }
 
     @PostMapping("/{sessionUuid}/enrollments")
+    @ResponseStatus(HttpStatus.CREATED)
     public Enrollment enroll(@PathVariable UUID sessionUuid, @RequestBody UserActionRequest request) {
         return sessionService.enroll(sessionUuid, request.userUuid());
     }

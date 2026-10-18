@@ -5,6 +5,7 @@ import com.joaoguilherme.tutoringmanagementsystem.dto.TutoringBondRequest;
 import com.joaoguilherme.tutoringmanagementsystem.model.TutoringBond;
 import com.joaoguilherme.tutoringmanagementsystem.service.TutoringBondService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -17,6 +18,7 @@ public class TutoringBondController {
     private final TutoringBondService tutoringBondService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public TutoringBond requestTutoringBond(@RequestBody TutoringBondRequest request) {
         return tutoringBondService.requestTutoringBond(request.subjectUuid(), request.requesterUuid());
     }

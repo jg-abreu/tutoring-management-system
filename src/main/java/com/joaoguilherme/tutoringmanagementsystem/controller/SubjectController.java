@@ -5,6 +5,7 @@ import com.joaoguilherme.tutoringmanagementsystem.dto.SuggestSubjectRequest;
 import com.joaoguilherme.tutoringmanagementsystem.model.Subject;
 import com.joaoguilherme.tutoringmanagementsystem.service.SubjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -17,6 +18,7 @@ public class SubjectController {
     private final SubjectService subjectService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Subject suggestSubject(@RequestBody SuggestSubjectRequest request) {
         return subjectService.suggestSubject(request.userUuid(), request.subjectName());
     }
