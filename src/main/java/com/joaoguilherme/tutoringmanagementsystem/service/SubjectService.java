@@ -1,6 +1,7 @@
 package com.joaoguilherme.tutoringmanagementsystem.service;
 
 import com.joaoguilherme.tutoringmanagementsystem.exception.InvalidSubjectStatusException;
+import com.joaoguilherme.tutoringmanagementsystem.exception.SubjectAlreadyExistsException;
 import com.joaoguilherme.tutoringmanagementsystem.exception.SubjectNotFoundException;
 import com.joaoguilherme.tutoringmanagementsystem.exception.UserNotFoundException;
 import com.joaoguilherme.tutoringmanagementsystem.model.Subject;
@@ -23,6 +24,10 @@ public class SubjectService {
 
     public Subject suggestSubject(UUID userUuid, String subjectName) {
         User creator = userRepository.findById(userUuid).orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        if (subjectRepository.existsByName(subjectName)) {
+            throw new SubjectAlreadyExistsException("Subject already exists");
+        }
 
         Subject subject = new Subject(creator, subjectName);
 
