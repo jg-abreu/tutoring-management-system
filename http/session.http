@@ -1,0 +1,109 @@
+@baseUrl = http://localhost:8080
+@bondUuid = 0128d64d-7818-4eec-9b8e-a55e8421ab1f
+@tutorUuid = 899b90d5-673e-4137-abd2-1606d73f9b0e
+@adminUuid = 2c53ba13-53cc-4c79-a4f2-31cfbcceb898
+@aluno1Uuid = 451c540f-a05f-4ead-a6d3-89528391d8ad
+@aluno2Uuid = fb0e9fd2-7181-495c-922b-dd4c7e5baf2c
+@aluno3Uuid = b5578fc3-17cd-4277-aec8-407227991e1f
+
+### 1. Monitor cria sessão com 1 vaga e lista de espera -> ACTIVE
+POST {{baseUrl}}/sessions
+Content-Type: application/json
+
+{
+  "tutoringBondUuid": "{{bondUuid}}",
+  "userUuid": "{{tutorUuid}}",
+  "startTime": "2026-11-20T14:00:00-03:00",
+  "endTime": "2026-11-20T16:00:00-03:00",
+  "spots": 1,
+  "allowsWaitlist": true
+}
+
+> {% client.global.set("sessionUuid", response.body.id); %}
+
+### 2. aluno1 se matricula -> CONFIRMED
+POST {{baseUrl}}/sessions/{{sessionUuid}}/enrollments
+Content-Type: application/json
+
+{
+  "userUuid": "{{aluno1Uuid}}"
+}
+
+> {% client.global.set("aluno1EnrollmentUuid", response.body.id); %}
+
+### 3. aluno2 se matricula com a sessão lotada -> WAITLISTED, posição 1
+POST {{baseUrl}}/sessions/{{sessionUuid}}/enrollments
+Content-Type: application/json
+
+{
+  "userUuid": "{{aluno2Uuid}}"
+}
+
+### 4. aluno3 se matricula -> WAITLISTED, posição 2
+POST {{baseUrl}}/sessions/{{sessionUuid}}/enrollments
+Content-Type: application/json
+
+{
+  "userUuid": "{{aluno3Uuid}}"
+}
+
+### 5. aluno2 tenta se matricular de novo -> 409
+POST {{baseUrl}}/sessions/{{sessionUuid}}/enrollments
+Content-Type: application/json
+
+{
+  "userUuid": "{{aluno2Uuid}}"
+}
+
+### 6. aluno3 tenta cancelar a matrícula do aluno1 -> 403
+PATCH {{baseUrl}}/enrollments/{{aluno1EnrollmentUuid}}/cancel
+Content-Type: application/json
+
+{
+  "userUuid": "{{aluno3Uuid}}"
+}
+
+### 7. aluno1 cancela a própria matrícula -> CANCELLED (aluno2 promovido, aluno3 vai para a posição 1)
+PATCH {{baseUrl}}/enrollments/{{aluno1EnrollmentUuid}}/cancel
+Content-Type: application/json
+
+{
+  "userUuid": "{{aluno1Uuid}}"
+}
+
+### 8. aluno1 cancela de novo uma matrícula já cancelada -> 409
+PATCH {{baseUrl}}/enrollments/{{aluno1EnrollmentUuid}}/cancel
+Content-Type: application/json
+
+{
+  "userUuid": "{{aluno1Uuid}}"
+}
+
+### 9. Monitor (requester do vínculo) tenta cancelar a sessão -> 403
+PATCH {{baseUrl}}/sessions/{{sessionUuid}}/cancel
+Content-Type: application/json
+
+{
+  "userUuid": "{{tutorUuid}}"
+}
+
+### 10. Admin (evaluator do vínculo) cancela a sessão -> CANCELLED
+PATCH {{baseUrl}}/sessions/{{sessionUuid}}/cancel
+Content-Type: application/json
+
+{
+  "userUuid": "{{adminUuid}}"
+}
+
+### 11. Sessão com fim antes do início -> 400
+POST {{baseUrl}}/sessions
+Content-Type: application/json
+
+{
+  "tutoringBondUuid": "{{bondUuid}}",
+  "userUuid": "{{tutorUuid}}",
+  "startTime": "2026-11-20T16:00:00-03:00",
+  "endTime": "2026-11-20T14:00:00-03:00",
+  "spots": 1,
+  "allowsWaitlist": false
+}

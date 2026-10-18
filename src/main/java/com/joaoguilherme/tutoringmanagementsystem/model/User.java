@@ -1,5 +1,6 @@
 package com.joaoguilherme.tutoringmanagementsystem.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,6 +26,7 @@ public class User {
     private String email;
 
     @Column(name = "password_hash", nullable = false, length = 60)
+    @JsonIgnore
     private String passwordHash;
 
     @Column(nullable = false)

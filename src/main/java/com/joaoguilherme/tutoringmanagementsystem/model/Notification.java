@@ -19,6 +19,12 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Notification {
 
+    public Notification(NotificationEventType eventType, String message, User receiver) {
+        this.eventType = eventType;
+        this.message = message;
+        this.receiver = receiver;
+    }
+
     @Id
     @GeneratedValue
     @UuidGenerator
