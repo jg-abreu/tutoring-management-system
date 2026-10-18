@@ -17,19 +17,17 @@ public class SubjectController {
     private final SubjectService subjectService;
 
     @PostMapping
-    public Subject suggestSubject (@RequestBody SuggestSubjectRequest request) {
+    public Subject suggestSubject(@RequestBody SuggestSubjectRequest request) {
         return subjectService.suggestSubject(request.userUuid(), request.subjectName());
     }
 
-    @PatchMapping ("/{subjectUuid}/approve")
-    public Subject approveSubject (@PathVariable UUID subjectUuid, @RequestBody AdminActionRequest request) {
-
+    @PatchMapping("/{subjectUuid}/approve")
+    public Subject approveSubject(@PathVariable UUID subjectUuid, @RequestBody AdminActionRequest request) {
         return subjectService.approveSubject(request.adminUuid(), subjectUuid);
     }
 
-    @PatchMapping ("/{subjectUuid}/reject")
-    public Subject rejectSubject (@PathVariable UUID subjectUuid, @RequestBody AdminActionRequest request) {
-
+    @PatchMapping("/{subjectUuid}/reject")
+    public Subject rejectSubject(@PathVariable UUID subjectUuid, @RequestBody AdminActionRequest request) {
         return subjectService.rejectSubject(request.adminUuid(), subjectUuid);
     }
 }

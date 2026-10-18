@@ -26,7 +26,6 @@ public class SessionService {
     private final NotificationRepository notificationRepository;
 
     public Session createSession(UUID tutoringBondUuid, UUID userId, OffsetDateTime startTime, OffsetDateTime endTime, int spots, boolean allowsWaitList) {
-
         if (!(endTime.isAfter(startTime))) {
             throw new InvalidTimeException("Invalid Time Exception");
         }
@@ -59,11 +58,9 @@ public class SessionService {
 
         session.setStatus(SessionStatus.CANCELLED);
         return sessionRepository.save(session);
-
     }
 
     public List<Session> cancelFutureSessions(TutoringBond tutoringBond) {
-
         OffsetDateTime presentMoment = OffsetDateTime.now();
 
         List<Session> futureSessions = sessionRepository.findByBondAndStatusAndStartTimeAfter(tutoringBond, SessionStatus.ACTIVE, presentMoment);
@@ -74,7 +71,6 @@ public class SessionService {
     }
 
     public Enrollment enroll(UUID sessionUuid, UUID studentUuid) {
-
         Session session = sessionRepository.findById(sessionUuid).orElseThrow(() -> new SessionNotFoundException("Session not found"));
 
         User student = userRepository.findById(studentUuid).orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -113,7 +109,6 @@ public class SessionService {
 
     @Transactional
     public Enrollment cancelEnrollment(UUID enrollmentUuid, UUID userUuid) {
-
         Enrollment enrollment = enrollmentRepository.findById(enrollmentUuid).orElseThrow(() -> new EnrollmentNotFoundException("Enrollment not found"));
 
         if (!(enrollment.getStudent().getId().equals(userUuid))) {
@@ -159,5 +154,4 @@ public class SessionService {
     private boolean isEvaluator(TutoringBond tutoringBond, UUID userId) {
         return (tutoringBond.getEvaluator() != null && tutoringBond.getEvaluator().getId().equals(userId));
     }
-
 }

@@ -50,5 +50,4 @@ public class Notification {
     public void onCreate() {
         this.createdAt = OffsetDateTime.now();
     }
-
 }

@@ -35,10 +35,10 @@ public class Session {
     @Column(nullable = false)
     private int spots;
 
-    @Column (name = "allows_waitlist", nullable = false)
+    @Column(name = "allows_waitlist", nullable = false)
     private boolean allowsWaitlist = false;
 
-    @Column (nullable = false)
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private SessionStatus status = SessionStatus.ACTIVE;
@@ -62,7 +62,4 @@ public class Session {
     public void onCreate() {
         this.createdAt = OffsetDateTime.now();
     }
-
-
-
 }

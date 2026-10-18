@@ -47,7 +47,7 @@ public class SubjectService {
     public Subject rejectSubject(UUID adminUuid, UUID subjectUuid) {
         Subject subject = subjectRepository.findById(subjectUuid).orElseThrow(() -> new SubjectNotFoundException("Subject not found"));
 
-        if (!(subject.getStatus().equals(SubjectStatus.PENDING))){
+        if (!(subject.getStatus().equals(SubjectStatus.PENDING))) {
             throw new InvalidSubjectStatusException("Invalid subject exception");
         }
 
@@ -59,5 +59,4 @@ public class SubjectService {
 
         return subjectRepository.save(subject);
     }
-
 }

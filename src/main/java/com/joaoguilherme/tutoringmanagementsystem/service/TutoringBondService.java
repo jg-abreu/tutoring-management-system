@@ -38,11 +38,9 @@ public class TutoringBondService {
         TutoringBond tutoringBond = new TutoringBond(requester, subject);
 
         return tutoringBondRepository.save(tutoringBond);
-
     }
 
     public TutoringBond approveTutoringBond(UUID tutoringBondUuid, UUID evaluatorUuid) {
-
         TutoringBond tutoringBond = tutoringBondRepository.findById(tutoringBondUuid).orElseThrow(() -> new TutoringBondNotFoundException("TutoringBond not found"));
 
         User evaluator = userRepository.findById(evaluatorUuid).orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -58,7 +56,6 @@ public class TutoringBondService {
     }
 
     public TutoringBond rejectTutoringBond(UUID tutoringBondUuid, UUID evaluatorUuid) {
-
         TutoringBond tutoringBond = tutoringBondRepository.findById(tutoringBondUuid).orElseThrow(() -> new TutoringBondNotFoundException("TutoringBond not found"));
 
         User evaluator = userRepository.findById(evaluatorUuid).orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -75,7 +72,6 @@ public class TutoringBondService {
 
     @Transactional
     public TutoringBond revokeTutoringBond(UUID tutoringBondUuid, UUID evaluatorUuid) {
-
         TutoringBond tutoringBond = tutoringBondRepository.findById(tutoringBondUuid).orElseThrow(() -> new TutoringBondNotFoundException("TutoringBond not found"));
 
         User evaluator = userRepository.findById(evaluatorUuid).orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -89,6 +85,5 @@ public class TutoringBondService {
         sessionService.cancelFutureSessions(tutoringBond);
 
         return tutoringBondRepository.save(tutoringBond);
-
     }
 }

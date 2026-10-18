@@ -12,6 +12,4 @@ import java.util.UUID;
 public interface TutoringBondRepository extends JpaRepository<TutoringBond, UUID> {
 
     public List<TutoringBond> findByRequesterAndSubjectAndStatusIn(User requester, Subject subject, List<BondStatus> statusIn);
-
-
 }

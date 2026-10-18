@@ -68,10 +68,8 @@ public class SessionServiceTest {
     @InjectMocks
     private SessionService sessionService;
 
-
     @Test
     void shouldCreateSessionWhenUserIsRequester() {
-
         UUID tutoringBondUuid = UUID.randomUUID();
 
         User requester = new User();
@@ -101,7 +99,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldCreateSessionWhenUserIsEvaluator() {
-
         UUID tutoringBondUuid = UUID.randomUUID();
 
         User requester = new User();
@@ -130,7 +127,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldThrowInvalidTimeExceptionWhenEndTimeIsBeforeStartTime() {
-
         OffsetDateTime startTime = OffsetDateTime.now().plusDays(1);
         OffsetDateTime endTime = startTime.minusHours(1);
 
@@ -141,7 +137,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldThrowInvalidTimeExceptionWhenEndTimeEqualsStartTime() {
-
         OffsetDateTime startTime = OffsetDateTime.now().plusDays(1);
 
         Assertions.assertThrows(InvalidTimeException.class, () -> sessionService.createSession(UUID.randomUUID(), UUID.randomUUID(), startTime, startTime, 5, false));
@@ -151,7 +146,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldThrowTutoringBondNotFoundExceptionWhenBondDoesNotExist() {
-
         UUID tutoringBondUuid = UUID.randomUUID();
 
         OffsetDateTime startTime = OffsetDateTime.now().plusDays(1);
@@ -166,7 +160,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldThrowUserWithoutPermissionExceptionWhenUserIsNotRequesterNorEvaluator() {
-
         UUID tutoringBondUuid = UUID.randomUUID();
 
         User requester = new User();
@@ -192,7 +185,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldThrowUserWithoutPermissionExceptionWhenBondIsPendingAndUserIsNotRequester() {
-
         UUID tutoringBondUuid = UUID.randomUUID();
 
         User requester = new User();
@@ -213,7 +205,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldThrowInvalidTutoringBondStatusExceptionWhenBondIsNotApproved() {
-
         UUID tutoringBondUuid = UUID.randomUUID();
 
         User requester = new User();
@@ -234,7 +225,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldCancelSessionWhenUserIsEvaluatorAndSessionIsActive() {
-
         UUID sessionUuid = UUID.randomUUID();
 
         User requester = new User();
@@ -263,7 +253,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldThrowSessionNotFoundExceptionWhenSessionDoesNotExist() {
-
         UUID sessionUuid = UUID.randomUUID();
 
         when(sessionRepository.findById(sessionUuid)).thenReturn(Optional.empty());
@@ -275,7 +264,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldThrowUserWithoutPermissionExceptionWhenUserIsRequester() {
-
         UUID sessionUuid = UUID.randomUUID();
 
         User requester = new User();
@@ -303,7 +291,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldThrowUserWithoutPermissionExceptionWhenBondHasNoEvaluator() {
-
         UUID sessionUuid = UUID.randomUUID();
 
         User requester = new User();
@@ -324,7 +311,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldThrowInvalidSessionStatusExceptionWhenSessionIsAlreadyCancelled() {
-
         UUID sessionUuid = UUID.randomUUID();
 
         User requester = new User();
@@ -351,7 +337,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldCancelFutureActiveSessionsWhenBondHasSessions() {
-
         TutoringBond tutoringBond = new TutoringBond(new User(), new Subject());
         tutoringBond.setStatus(BondStatus.APPROVED);
 
@@ -374,7 +359,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldQueryOnlyActiveSessionsWhenCancellingFutureSessions() {
-
         TutoringBond tutoringBond = new TutoringBond(new User(), new Subject());
 
         OffsetDateTime before = OffsetDateTime.now();
@@ -392,7 +376,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldReturnEmptyListWhenBondHasNoFutureSessions() {
-
         TutoringBond tutoringBond = new TutoringBond(new User(), new Subject());
 
         when(sessionRepository.findByBondAndStatusAndStartTimeAfter(eq(tutoringBond), eq(SessionStatus.ACTIVE), any(OffsetDateTime.class))).thenReturn(List.of());
@@ -405,7 +388,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldConfirmEnrollmentWhenThereAreAvailableSpots() {
-
         UUID sessionUuid = UUID.randomUUID();
 
         User student = new User();
@@ -433,7 +415,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldAddToWaitlistWhenSessionIsFullAndAllowsWaitlist() {
-
         UUID sessionUuid = UUID.randomUUID();
 
         User student = new User();
@@ -462,7 +443,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldThrowSessionFullExceptionWhenSessionIsFullAndDoesNotAllowWaitlist() {
-
         UUID sessionUuid = UUID.randomUUID();
 
         User student = new User();
@@ -485,7 +465,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldThrowSessionNotFoundExceptionWhenEnrollingInNonexistentSession() {
-
         UUID sessionUuid = UUID.randomUUID();
 
         when(sessionRepository.findById(sessionUuid)).thenReturn(Optional.empty());
@@ -497,7 +476,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldThrowUserNotFoundExceptionWhenStudentDoesNotExist() {
-
         UUID sessionUuid = UUID.randomUUID();
         UUID studentUuid = UUID.randomUUID();
 
@@ -515,7 +493,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldThrowInvalidSessionStatusExceptionWhenEnrollingInCancelledSession() {
-
         UUID sessionUuid = UUID.randomUUID();
 
         User student = new User();
@@ -536,7 +513,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldThrowEnrollmentAlreadyExistsExceptionWhenStudentIsAlreadyEnrolled() {
-
         UUID sessionUuid = UUID.randomUUID();
 
         User student = new User();
@@ -557,7 +533,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldPromoteFirstWaitlistedWhenConfirmedEnrollmentIsCancelled() {
-
         UUID enrollmentUuid = UUID.randomUUID();
 
         User student = new User();
@@ -606,7 +581,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldCancelConfirmedEnrollmentWithoutPromotionWhenWaitlistIsEmpty() {
-
         UUID enrollmentUuid = UUID.randomUUID();
 
         User student = new User();
@@ -632,7 +606,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldReorderWaitlistWhenWaitlistedEnrollmentIsCancelled() {
-
         UUID enrollmentUuid = UUID.randomUUID();
 
         User student = new User();
@@ -671,7 +644,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldThrowEnrollmentNotFoundExceptionWhenEnrollmentDoesNotExist() {
-
         UUID enrollmentUuid = UUID.randomUUID();
 
         when(enrollmentRepository.findById(enrollmentUuid)).thenReturn(Optional.empty());
@@ -684,7 +656,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldThrowUserWithoutPermissionExceptionWhenUserIsNotEnrollmentStudent() {
-
         UUID enrollmentUuid = UUID.randomUUID();
 
         User student = new User();
@@ -708,7 +679,6 @@ public class SessionServiceTest {
 
     @Test
     void shouldThrowInvalidEnrollmentStatusExceptionWhenEnrollmentIsAlreadyCancelled() {
-
         UUID enrollmentUuid = UUID.randomUUID();
 
         User student = new User();
@@ -728,5 +698,4 @@ public class SessionServiceTest {
         verify(enrollmentRepository, never()).save(any(Enrollment.class));
         verifyNoInteractions(notificationRepository);
     }
-
 }

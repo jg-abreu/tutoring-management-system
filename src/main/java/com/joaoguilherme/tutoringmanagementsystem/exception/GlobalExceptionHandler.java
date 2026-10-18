@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
     @ExceptionHandler(SubjectNotFoundException.class)
     public ResponseEntity<String> handleSubjectNotFoundException(SubjectNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
@@ -76,6 +77,4 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleUserWithoutPermissionException(UserWithoutPermissionException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
-
-
 }

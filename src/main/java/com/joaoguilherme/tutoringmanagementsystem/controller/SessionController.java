@@ -23,14 +23,12 @@ public class SessionController {
     }
 
     @PatchMapping("/{sessionUuid}/cancel")
-    public Session cancelSession( @PathVariable UUID sessionUuid , @RequestBody UserActionRequest request) {
-
+    public Session cancelSession(@PathVariable UUID sessionUuid, @RequestBody UserActionRequest request) {
         return sessionService.cancelSession(sessionUuid, request.userUuid());
-
     }
 
     @PostMapping("/{sessionUuid}/enrollments")
-    public Enrollment enroll (@PathVariable UUID sessionUuid, @RequestBody UserActionRequest request) {
+    public Enrollment enroll(@PathVariable UUID sessionUuid, @RequestBody UserActionRequest request) {
         return sessionService.enroll(sessionUuid, request.userUuid());
     }
 }

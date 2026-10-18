@@ -10,14 +10,13 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("enrollments")
+@RequestMapping("/enrollments")
 public class EnrollmentController {
 
     private final SessionService sessionService;
 
     @PatchMapping("/{enrollmentUuid}/cancel")
-    public Enrollment cancelEnrollment (@PathVariable UUID enrollmentUuid, @RequestBody UserActionRequest request) {
-
+    public Enrollment cancelEnrollment(@PathVariable UUID enrollmentUuid, @RequestBody UserActionRequest request) {
         return sessionService.cancelEnrollment(enrollmentUuid, request.userUuid());
     }
 }

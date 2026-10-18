@@ -36,4 +36,3 @@ public class TutoringBondController {
         return tutoringBondService.revokeTutoringBond(tutoringBondUuid, adminActionRequest.adminUuid());
     }
 }
-

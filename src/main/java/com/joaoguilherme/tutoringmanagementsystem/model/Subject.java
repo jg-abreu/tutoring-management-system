@@ -19,8 +19,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Subject {
 
-
-
     @Id
     @GeneratedValue
     @UuidGenerator
@@ -38,7 +36,6 @@ public class Subject {
     @JoinColumn(name = "creator_id", nullable = false)
     private User creator;
 
-
     @ManyToOne
     @JoinColumn(name = "evaluator_id")
     private User evaluator;
@@ -55,5 +52,4 @@ public class Subject {
     public void onCreate() {
         this.createdAt = OffsetDateTime.now();
     }
-
 }

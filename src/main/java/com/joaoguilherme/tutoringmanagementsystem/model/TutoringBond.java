@@ -13,7 +13,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table (name = "tutoring_bond")
+@Table(name = "tutoring_bond")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,7 +32,6 @@ public class TutoringBond {
     @ManyToOne
     @JoinColumn(name = "requester_id", nullable = false)
     private User requester;
-
 
     @ManyToOne
     @JoinColumn(name = "evaluator_id")
