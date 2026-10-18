@@ -1,12 +1,16 @@
 package com.joaoguilherme.tutoringmanagementsystem.service;
 
+import com.joaoguilherme.tutoringmanagementsystem.exception.InvalidSubjectStatusException;
 import com.joaoguilherme.tutoringmanagementsystem.exception.InvalidTutoringBondStatusException;
+import com.joaoguilherme.tutoringmanagementsystem.exception.SubjectNotFoundException;
+import com.joaoguilherme.tutoringmanagementsystem.exception.TutoringBondAlreadyExistsException;
 import com.joaoguilherme.tutoringmanagementsystem.exception.TutoringBondNotFoundException;
 import com.joaoguilherme.tutoringmanagementsystem.exception.UserNotFoundException;
 import com.joaoguilherme.tutoringmanagementsystem.model.Subject;
 import com.joaoguilherme.tutoringmanagementsystem.model.TutoringBond;
 import com.joaoguilherme.tutoringmanagementsystem.model.User;
 import com.joaoguilherme.tutoringmanagementsystem.model.enums.BondStatus;
+import com.joaoguilherme.tutoringmanagementsystem.model.enums.SubjectStatus;
 import com.joaoguilherme.tutoringmanagementsystem.repository.SubjectRepository;
 import com.joaoguilherme.tutoringmanagementsystem.repository.TutoringBondRepository;
 import com.joaoguilherme.tutoringmanagementsystem.repository.UserRepository;
@@ -17,10 +21,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -282,5 +288,96 @@ public class TutoringBondServiceTest {
         Assertions.assertThrows(InvalidTutoringBondStatusException.class, () -> tutoringBondService.revokeTutoringBond(tutoringBondUuid, admin.getId()));
 
         verifyNoInteractions(sessionService);
+    }
+
+    private Subject subjectWithStatus(SubjectStatus status) {
+        Subject subject = new Subject(new User(), "Calculus I");
+        subject.setId(UUID.randomUUID());
+        subject.setStatus(status);
+        return subject;
+    }
+
+    @Test
+    void shouldRequestTutoringBondWhenSubjectIsApprovedAndNoActiveBondExists() {
+        Subject subject = subjectWithStatus(SubjectStatus.APPROVED);
+
+        User requester = new User();
+        requester.setId(UUID.randomUUID());
+
+        when(subjectRepository.findById(subject.getId())).thenReturn(Optional.of(subject));
+        when(userRepository.findById(requester.getId())).thenReturn(Optional.of(requester));
+        when(tutoringBondRepository.findByRequesterAndSubjectAndStatusIn(requester, subject, List.of(BondStatus.PENDING, BondStatus.APPROVED))).thenReturn(List.of());
+        when(tutoringBondRepository.save(any(TutoringBond.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        TutoringBond tutoringBond = tutoringBondService.requestTutoringBond(subject.getId(), requester.getId());
+
+        Assertions.assertEquals(BondStatus.PENDING, tutoringBond.getStatus());
+        Assertions.assertEquals(requester, tutoringBond.getRequester());
+        Assertions.assertEquals(subject, tutoringBond.getSubject());
+        Assertions.assertNull(tutoringBond.getEvaluator());
+    }
+
+    @Test
+    void shouldThrowSubjectNotFoundExceptionWhenRequestingBondForUnknownSubject() {
+        UUID subjectUuid = UUID.randomUUID();
+
+        when(subjectRepository.findById(subjectUuid)).thenReturn(Optional.empty());
+
+        Assertions.assertThrows(SubjectNotFoundException.class, () -> tutoringBondService.requestTutoringBond(subjectUuid, UUID.randomUUID()));
+
+        verifyNoInteractions(userRepository, tutoringBondRepository);
+    }
+
+    @Test
+    void shouldThrowInvalidSubjectStatusExceptionWhenSubjectIsPending() {
+        Subject subject = subjectWithStatus(SubjectStatus.PENDING);
+
+        when(subjectRepository.findById(subject.getId())).thenReturn(Optional.of(subject));
+
+        Assertions.assertThrows(InvalidSubjectStatusException.class, () -> tutoringBondService.requestTutoringBond(subject.getId(), UUID.randomUUID()));
+
+        verifyNoInteractions(userRepository, tutoringBondRepository);
+    }
+
+    @Test
+    void shouldThrowInvalidSubjectStatusExceptionWhenSubjectIsRejected() {
+        Subject subject = subjectWithStatus(SubjectStatus.REJECTED);
+
+        when(subjectRepository.findById(subject.getId())).thenReturn(Optional.of(subject));
+
+        Assertions.assertThrows(InvalidSubjectStatusException.class, () -> tutoringBondService.requestTutoringBond(subject.getId(), UUID.randomUUID()));
+
+        verifyNoInteractions(userRepository, tutoringBondRepository);
+    }
+
+    @Test
+    void shouldThrowUserNotFoundExceptionWhenRequesterDoesNotExist() {
+        Subject subject = subjectWithStatus(SubjectStatus.APPROVED);
+        UUID requesterUuid = UUID.randomUUID();
+
+        when(subjectRepository.findById(subject.getId())).thenReturn(Optional.of(subject));
+        when(userRepository.findById(requesterUuid)).thenReturn(Optional.empty());
+
+        Assertions.assertThrows(UserNotFoundException.class, () -> tutoringBondService.requestTutoringBond(subject.getId(), requesterUuid));
+
+        verifyNoInteractions(tutoringBondRepository);
+    }
+
+    @Test
+    void shouldThrowTutoringBondAlreadyExistsExceptionWhenActiveBondExists() {
+        Subject subject = subjectWithStatus(SubjectStatus.APPROVED);
+
+        User requester = new User();
+        requester.setId(UUID.randomUUID());
+
+        TutoringBond existingBond = new TutoringBond(requester, subject);
+
+        when(subjectRepository.findById(subject.getId())).thenReturn(Optional.of(subject));
+        when(userRepository.findById(requester.getId())).thenReturn(Optional.of(requester));
+        when(tutoringBondRepository.findByRequesterAndSubjectAndStatusIn(requester, subject, List.of(BondStatus.PENDING, BondStatus.APPROVED))).thenReturn(List.of(existingBond));
+
+        Assertions.assertThrows(TutoringBondAlreadyExistsException.class, () -> tutoringBondService.requestTutoringBond(subject.getId(), requester.getId()));
+
+        verify(tutoringBondRepository, never()).save(any(TutoringBond.class));
     }
 }
