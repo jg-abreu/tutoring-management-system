@@ -5,6 +5,7 @@ import com.joaoguilherme.tutoringmanagementsystem.model.Subject;
 import com.joaoguilherme.tutoringmanagementsystem.model.TutoringBond;
 import com.joaoguilherme.tutoringmanagementsystem.model.User;
 import com.joaoguilherme.tutoringmanagementsystem.model.enums.BondStatus;
+import com.joaoguilherme.tutoringmanagementsystem.model.enums.SubjectStatus;
 import com.joaoguilherme.tutoringmanagementsystem.repository.SubjectRepository;
 import com.joaoguilherme.tutoringmanagementsystem.repository.TutoringBondRepository;
 import com.joaoguilherme.tutoringmanagementsystem.repository.UserRepository;
@@ -26,6 +27,10 @@ public class TutoringBondService {
 
     public TutoringBond requestTutoringBond(UUID subjectUuid, UUID requesterUuid) {
         Subject subject = subjectRepository.findById(subjectUuid).orElseThrow(() -> new SubjectNotFoundException("Subject not found"));
+
+        if (subject.getStatus() != SubjectStatus.APPROVED) {
+            throw new InvalidSubjectStatusException("Subject is not approved");
+        }
 
         User requester = userRepository.findById(requesterUuid).orElseThrow(() -> new UserNotFoundException("User not found"));
 
