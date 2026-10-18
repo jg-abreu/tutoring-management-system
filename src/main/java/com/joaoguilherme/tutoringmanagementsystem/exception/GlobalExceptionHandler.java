@@ -77,4 +77,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleUserWithoutPermissionException(UserWithoutPermissionException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
+
+    @ExceptionHandler(SubjectAlreadyExistsException.class)
+    public ResponseEntity<String> handleSubjectAlreadyExistsException(SubjectAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
 }
