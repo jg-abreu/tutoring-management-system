@@ -2,6 +2,7 @@ package com.joaoguilherme.tutoringmanagementsystem.controller;
 
 import com.joaoguilherme.tutoringmanagementsystem.dto.SessionRequest;
 import com.joaoguilherme.tutoringmanagementsystem.dto.UserActionRequest;
+import com.joaoguilherme.tutoringmanagementsystem.model.Enrollment;
 import com.joaoguilherme.tutoringmanagementsystem.model.Session;
 import com.joaoguilherme.tutoringmanagementsystem.service.SessionService;
 import lombok.RequiredArgsConstructor;
@@ -26,5 +27,10 @@ public class SessionController {
 
         return sessionService.cancelSession(sessionUuid, request.userUuid());
 
+    }
+
+    @PostMapping("/{sessionUuid}/enrollments")
+    public Enrollment enroll (@PathVariable UUID sessionUuid, @RequestBody UserActionRequest request) {
+        return sessionService.enroll(sessionUuid, request.userUuid());
     }
 }
