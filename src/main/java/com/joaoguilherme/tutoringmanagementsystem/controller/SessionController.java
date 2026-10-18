@@ -2,7 +2,6 @@ package com.joaoguilherme.tutoringmanagementsystem.controller;
 
 import com.joaoguilherme.tutoringmanagementsystem.dto.SessionRequest;
 import com.joaoguilherme.tutoringmanagementsystem.model.Session;
-import com.joaoguilherme.tutoringmanagementsystem.repository.SessionRepository;
 import com.joaoguilherme.tutoringmanagementsystem.service.SessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;

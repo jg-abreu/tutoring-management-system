@@ -2,5 +2,5 @@ package com.joaoguilherme.tutoringmanagementsystem.dto;
 
 import java.util.UUID;
 
-public record UserActionRequest(UUID studentUuid) {
+public record UserActionRequest(UUID userUuid) {
 }
