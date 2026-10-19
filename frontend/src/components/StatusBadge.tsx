@@ -1,4 +1,5 @@
-const LABELS: Record<string, string> = {
+// Matéria, sessão e matrícula são substantivos femininos; vínculo é masculino.
+const FEMININE: Record<string, string> = {
   ACTIVE: 'Ativa',
   CANCELLED: 'Cancelada',
   CONFIRMED: 'Confirmada',
@@ -9,10 +10,25 @@ const LABELS: Record<string, string> = {
   REVOKED: 'Revogada',
 }
 
-export function StatusBadge({ status, suffix }: { status: string; suffix?: string }) {
+const MASCULINE: Record<string, string> = {
+  ...FEMININE,
+  REJECTED: 'Rejeitado',
+  APPROVED: 'Aprovado',
+  REVOKED: 'Revogado',
+}
+
+type Props = {
+  status: string
+  suffix?: string
+  masculine?: boolean
+}
+
+export function StatusBadge({ status, suffix, masculine = false }: Props) {
+  const labels = masculine ? MASCULINE : FEMININE
+
   return (
     <span className={`badge badge-${status.toLowerCase()}`}>
-      {LABELS[status] ?? status}
+      {labels[status] ?? status}
       {suffix ? ` ${suffix}` : ''}
     </span>
   )

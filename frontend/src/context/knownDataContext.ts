@@ -25,6 +25,15 @@ export function useKnownData() {
   return context
 }
 
+// A API devolve createdAt com fusos diferentes conforme o caminho (recém-criado
+// vem com -03:00; lido do banco vem em UTC com Z), então comparar como texto
+// embaralha a ordem. Comparar como instante resolve.
+const time = (iso: string) => new Date(iso).getTime()
+
 export function newestFirst<T extends { createdAt: string }>(items: ById<T>): T[] {
-  return Object.values(items).sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  return Object.values(items).sort((a, b) => time(b.createdAt) - time(a.createdAt))
+}
+
+export function oldestFirst<T extends { createdAt: string }>(items: T[]): T[] {
+  return [...items].sort((a, b) => time(a.createdAt) - time(b.createdAt))
 }

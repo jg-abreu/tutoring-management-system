@@ -10,14 +10,15 @@ export class ApiError extends Error {
   }
 }
 
-// O GlobalExceptionHandler devolve a mensagem como texto puro; erros que o
-// Spring trata sozinho (ex.: JSON inválido) vêm como JSON com o campo "error".
+// As regras de negócio (GlobalExceptionHandler) devolvem a mensagem como texto
+// puro. Erros que o Spring trata sozinho (validação dos DTOs, JSON malformado)
+// vêm como application/problem+json, com os campos "detail" e "title".
 async function readErrorMessage(response: Response): Promise<string> {
   const text = await response.text()
-  if (!text) return response.statusText
+  if (!text) return response.statusText || 'Erro sem mensagem'
   try {
     const body = JSON.parse(text)
-    return body.message || body.error || text
+    return body.detail || body.title || body.message || body.error || text
   } catch {
     return text
   }

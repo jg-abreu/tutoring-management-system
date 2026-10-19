@@ -54,7 +54,7 @@ export function CreateSessionForm({ userUuid, userLabel, bondOptions, busy, onSu
       </label>
 
       <label className="field">
-        <span>Vagas</span>
+        <span>Capacidade</span>
         <input type="number" min={1} value={spots} onChange={(e) => setSpots(Number(e.target.value))} required />
       </label>
 

@@ -44,7 +44,14 @@ export function SubjectsPage() {
         <h2>Sugerir matéria</h2>
         <label className="field field-wide">
           <span>Nome da matéria</span>
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Álgebra Linear" required />
+          {/* maxLength igual ao @Size(max = 255) do SuggestSubjectRequest */}
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Ex.: Álgebra Linear"
+            maxLength={255}
+            required
+          />
         </label>
         <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={busy}>

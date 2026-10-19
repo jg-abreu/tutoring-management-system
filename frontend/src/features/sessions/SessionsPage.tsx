@@ -3,7 +3,7 @@ import type { Enrollment, Session } from '../../api/types'
 import { Feedback } from '../../components/Feedback'
 import { KNOWN_BONDS, userLabel } from '../../config/testData'
 import { useCurrentUser } from '../../context/currentUserContext'
-import { newestFirst, useKnownData } from '../../context/knownDataContext'
+import { newestFirst, oldestFirst, useKnownData } from '../../context/knownDataContext'
 import { useApiAction } from '../../hooks/useApiAction'
 import { CreateSessionForm } from './CreateSessionForm'
 import { SessionCard } from './SessionCard'
@@ -13,10 +13,15 @@ export function SessionsPage() {
   const { bonds, sessions, enrollments, saveSession, saveEnrollment } = useKnownData()
   const { busy, feedback, run, clearFeedback } = useApiAction()
 
+  // Só os vínculos aprovados em que o usuário atual pode criar sessão
+  // (a API aceita o requester ou o evaluator do vínculo).
+  const canUse = (requesterId: string, evaluatorId?: string | null) =>
+    requesterId === user.id || evaluatorId === user.id
+
   const bondOptions = [
-    ...KNOWN_BONDS,
+    ...KNOWN_BONDS.filter((k) => !bonds[k.id] && canUse(k.requesterId, k.evaluatorId)),
     ...newestFirst(bonds)
-      .filter((b) => b.status === 'APPROVED' && !KNOWN_BONDS.some((k) => k.id === b.id))
+      .filter((b) => b.status === 'APPROVED' && canUse(b.requester.id, b.evaluator?.id))
       .map((b) => ({ id: b.id, label: `${userLabel(b.requester.id)} · ${b.subject.name}` })),
   ]
 
@@ -49,9 +54,7 @@ export function SessionsPage() {
 
   const sessionList = newestFirst(sessions)
   const enrollmentsOf = (sessionId: string) =>
-    Object.values(enrollments)
-      .filter((e) => e.session.id === sessionId)
-      .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+    oldestFirst(Object.values(enrollments).filter((e) => e.session.id === sessionId))
 
   return (
     <div className="page">

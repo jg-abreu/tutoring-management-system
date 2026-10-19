@@ -38,7 +38,7 @@ export function SessionCard({
 
       <dl className="session-facts">
         <div>
-          <dt>Vagas</dt>
+          <dt>Capacidade</dt>
           <dd>{session.spots}</dd>
         </div>
         <div>
@@ -76,7 +76,7 @@ export function SessionCard({
                 status={enrollment.status}
                 suffix={enrollment.queuePosition ? `#${enrollment.queuePosition}` : undefined}
               />
-              {(enrollment.status === 'CONFIRMED' || enrollment.status === 'WAITLISTED') && (
+              {active && (enrollment.status === 'CONFIRMED' || enrollment.status === 'WAITLISTED') && (
                 <button
                   type="button"
                   className="btn btn-small"

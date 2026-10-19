@@ -85,7 +85,7 @@ export function BondsPage() {
                 </span>
               </p>
             </div>
-            <StatusBadge status={bond.status} />
+            <StatusBadge status={bond.status} masculine />
             <div className="row-actions">
               {bond.status === 'PENDING' && (
                 <>

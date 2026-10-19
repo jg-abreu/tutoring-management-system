@@ -1,5 +1,6 @@
 import { UserSwitcher } from './components/UserSwitcher'
 import { CurrentUserProvider } from './context/CurrentUser'
+import { useCurrentUser } from './context/currentUserContext'
 import { KnownDataProvider } from './context/KnownData'
 import { useKnownData } from './context/knownDataContext'
 import { BondsPage } from './features/bonds/BondsPage'
@@ -18,6 +19,7 @@ type TabId = (typeof TABS)[number]['id']
 function Shell() {
   const [tabId, setTabId] = useLocalStorage<TabId>('currentTab', 'sessions')
   const { clearAll } = useKnownData()
+  const { user } = useCurrentUser()
   const Page = (TABS.find((t) => t.id === tabId) ?? TABS[2]).page
 
   return (
@@ -54,7 +56,8 @@ function Shell() {
             Limpar dados locais
           </button>
         </section>
-        <Page />
+        {/* key: trocar de usuário remonta a tela, limpando a mensagem e os formulários */}
+        <Page key={user.id} />
       </main>
     </>
   )

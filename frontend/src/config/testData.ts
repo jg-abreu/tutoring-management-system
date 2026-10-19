@@ -17,10 +17,17 @@ export const TEST_USERS: TestUser[] = [
 ]
 
 // Registros que já existiam no banco antes do frontend (aparecem como sugestão nos formulários).
-export const KNOWN_SUBJECTS = [{ id: 'a4ce163a-0660-4262-9b5c-15f457fba955', label: 'Cálculo I (aprovada)' }]
+export const KNOWN_SUBJECTS = [{ id: 'a4ce163a-0660-4262-9b5c-15f457fba955', label: 'Cálculo I' }]
 
+// Vínculos aprovados que já existiam. requesterId/evaluatorId dizem quem pode
+// criar sessão neles (a API aceita o requester ou o evaluator do vínculo).
 export const KNOWN_BONDS = [
-  { id: '0128d64d-7818-4eec-9b8e-a55e8421ab1f', label: 'jgabreuteste · Cálculo I (aprovado)' },
+  {
+    id: '0128d64d-7818-4eec-9b8e-a55e8421ab1f',
+    label: 'jgabreuteste · Cálculo I',
+    requesterId: '899b90d5-673e-4137-abd2-1606d73f9b0e',
+    evaluatorId: '2c53ba13-53cc-4c79-a4f2-31cfbcceb898',
+  },
 ]
 
 export function userLabel(id: string): string {
