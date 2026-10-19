@@ -201,7 +201,7 @@ O domínio foi modelado por completo antes de qualquer linha de código. Diagram
 
 ## Status atual
 
-✅ **Versão 1.1 concluída** (backend + frontend). Próximo passo: v2.0.
+✅ **Versão 1.1 concluída** (backend + frontend), agora executável com Docker Compose. Próximo passo: v2.0.
 
 - [x] Modelagem de domínio completa (diagramas ER, classes, fluxos de negócio)
 - [x] Schema de banco de dados desenhado e documentado
@@ -235,6 +235,7 @@ O domínio foi modelado por completo antes de qualquer linha de código. Diagram
 - [x] Validação de entrada nos DTOs com Bean Validation (`@NotNull`, `@NotBlank`, `@Size`, `@Min` + `@Valid`) → 400
 - [x] Testes de unidade do `SubjectService` e do `requestTutoringBond` (61 testes no total)
 - [x] **Versão 1.1**: frontend + correções de validação e tratamento de erros
+- [x] Docker Compose para rodar o sistema completo (PostgreSQL com schema e dados de exemplo, API e frontend) com um único `docker compose up`, testado a partir de um clone limpo
 - [ ] Segurança/autenticação (para extrair o usuário logado em vez de recebê-lo no corpo da requisição) — v2.0
 - [ ] Papéis de usuário (admin): hoje `User` não tem papel, então as ações "de admin" não verificam nada e o cancelamento de matrícula por admin ficou de fora — v2.0
 - [ ] Endpoints `GET` (listar matérias, vínculos, sessões e matrículas) — v2.0
@@ -244,12 +245,11 @@ O domínio foi modelado por completo antes de qualquer linha de código. Diagram
 - [ ] Normalizar nomes de matéria (maiúsculas e acentos) antes de checar duplicidade — v2.0
 - [ ] Concorrência na matrícula: dois alunos disputando a última vaga ao mesmo tempo podem ser confirmados juntos (exige lock no banco) — v2.0
 - [ ] Separar banco de desenvolvimento/testes do banco "real" — v2.0
-- [ ] Dockerização da aplicação (planejada para o final do projeto, junto com autenticação) — v2.0
 
 ### Convenções de processo adotadas
 
 - **Testes logo após cada service**: testes de unidade (JUnit/Mockito) são escritos assim que um service é concluído, antes de avançar para o próximo — não ficam acumulados para o final do projeto
-- **Docker no final**: a conteinerização da aplicação fica para uma das últimas etapas, depois de toda a lógica de negócio, autenticação e testes estarem prontos
+- **Docker para quem testa**: o Docker Compose foi antecipado (antes da autenticação) para que recrutadores e devs consigam rodar o sistema sem configurar banco; o desenvolvimento do dia a dia continua no Neon
 
 ## Stack de infraestrutura
 
@@ -258,3 +258,4 @@ O domínio foi modelado por completo antes de qualquer linha de código. Diagram
 - **Lombok:** usado para reduzir código repetitivo (getters, setters, construtores) nas entidades e services
 - **HTTP Client (IntelliJ Ultimate):** usado para testar os endpoints REST, com arquivos `.http` versionados na pasta `http/`
 - **Node.js + Vite:** ambiente de desenvolvimento do frontend
+- **Docker Compose:** PostgreSQL 17 com schema e seed carregados na primeira subida (`docker/postgres/init/`), API em imagem de duas etapas (Maven → JRE 21) e frontend servido por nginx, que repassa `/api` para a API (mesma origem, sem CORS)
