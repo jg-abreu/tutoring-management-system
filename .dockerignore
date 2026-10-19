@@ -1,0 +1,10 @@
+.git
+.idea
+.mvn
+.claude
+target
+frontend
+docker
+docs
+http
+*.md
