@@ -20,6 +20,38 @@ Projeto pessoal de portfólio, construído com foco em modelagem de domínio rea
 
 ## Como rodar
 
+### Rodar com Docker (recomendado para testar)
+
+Só precisa do [Docker Desktop](https://www.docker.com/products/docker-desktop/). O compose sobe o PostgreSQL (já com schema e dados de exemplo), a API e o frontend:
+
+```bash
+git clone https://github.com/jg-abreu/tutoring-management-system.git
+cd tutoring-management-system
+docker compose up --build
+```
+
+A primeira subida leva alguns minutos (download das imagens e build). Depois:
+
+| O quê | Endereço |
+|---|---|
+| Frontend | http://localhost:3000 |
+| API | http://localhost:8080 |
+| PostgreSQL (pgAdmin, DBeaver...) | `localhost:5433`, banco/usuário/senha `tutoring` |
+
+Os dados ficam num volume do Docker e sobrevivem a `docker compose down`. Para voltar ao estado inicial (schema + seed de novo): `docker compose down -v` e depois `docker compose up`.
+
+**Usuários de teste.** Ainda não há login: o frontend tem o seletor **"Agindo como"**, e a API recebe o UUID do usuário no corpo da requisição. O seed ([`docker/postgres/init/02-seed.sql`](./docker/postgres/init/02-seed.sql)) cria:
+
+| No seletor | E-mail | Papel | UUID |
+|---|---|---|---|
+| admin | `admin@monitoria.dev` | Admin | `2c53ba13-53cc-4c79-a4f2-31cfbcceb898` |
+| jgabreuteste | `monitor@monitoria.dev` | Monitor de Cálculo I | `899b90d5-673e-4137-abd2-1606d73f9b0e` |
+| aluno1 | `aluno1@monitoria.dev` | Aluno | `451c540f-a05f-4ead-a6d3-89528391d8ad` |
+| aluno2 | `aluno2@monitoria.dev` | Aluno | `fb0e9fd2-7181-495c-922b-dd4c7e5baf2c` |
+| aluno3 | `aluno3@monitoria.dev` | Aluno | `b5578fc3-17cd-4277-aec8-407227991e1f` |
+
+Também já existem as matérias aprovadas **Cálculo I** (`a4ce163a-0660-4262-9b5c-15f457fba955`) e **Algoritmos e Estruturas de Dados** (`ef56bc00-2be6-4a12-af88-9f809de94ba5`), e o vínculo **aprovado** do monitor em Cálculo I (`0128d64d-7818-4eec-9b8e-a55e8421ab1f`, avaliado pelo admin). Com isso dá para ir direto ao passo 4 do [passo a passo](#como-usar-passo-a-passo): criar uma sessão com poucas vagas e lista de espera, e matricular os três alunos.
+
 ### Backend
 
 Pré-requisitos: Java 21 e um banco PostgreSQL com o schema de [`docs/database_schema_reference.md`](./docs/database_schema_reference.md) (o Hibernate roda com `ddl-auto=validate` e não cria tabelas).
@@ -55,6 +87,8 @@ Detalhes no [README do frontend](./frontend/README.md).
 O fluxo completo do sistema, do zero até uma sessão com lista de espera, feito pelo frontend em `http://localhost:5173`.
 
 ### 0. Preparar os usuários (só na primeira vez, num banco novo)
+
+> Rodando com Docker, pule este passo: os usuários já vêm do seed e o frontend fica em `http://localhost:3000`.
 
 Ainda não existe cadastro nem login (planejados para a v2.0), então os usuários são inseridos direto no banco. Rode no seu PostgreSQL:
 
