@@ -32,11 +32,11 @@ docker compose up --build
 
 A primeira subida leva alguns minutos (download das imagens e build). Depois:
 
-| O quê | Endereço |
-|---|---|
-| Frontend | http://localhost:3000 |
-| API | http://localhost:8080 |
-| PostgreSQL (pgAdmin, DBeaver...) | `localhost:5433`, banco/usuário/senha `tutoring` |
+| O quê | Endereço | Como acessar |
+|---|---|---|
+| Frontend | http://localhost:3000 | no navegador (é por aqui que se testa) |
+| API | http://localhost:8080 | por um cliente HTTP (arquivos [`http/`](./http), Postman, curl). A API ainda não tem `GET`, então abrir no navegador mostra 404, e isso é esperado |
+| PostgreSQL | `localhost:5433`, banco/usuário/senha `tutoring` | por um cliente de banco (pgAdmin, DBeaver, IntelliJ); não abre no navegador |
 
 Os dados ficam num volume do Docker e sobrevivem a `docker compose down`. Para voltar ao estado inicial (schema + seed de novo): `docker compose down -v` e depois `docker compose up`.
 
