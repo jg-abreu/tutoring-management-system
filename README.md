@@ -1,17 +1,69 @@
 # Sistema de Gestão de Monitoria Acadêmica
 
-Sistema backend para gerenciar grupos de estudo e sessões de monitoria acadêmica, com controle de vínculos de monitoria aprovados por administrador, sessões com vagas limitadas e lista de espera, e cascata automática de cancelamento quando um vínculo é revogado.
+Sistema para gerenciar grupos de estudo e sessões de monitoria acadêmica, com controle de vínculos de monitoria aprovados por administrador, sessões com vagas limitadas e lista de espera, e cascata automática de cancelamento quando um vínculo é revogado. API REST em Spring Boot + interface web em React.
 
 Projeto pessoal de portfólio, construído com foco em modelagem de domínio real, regras de negócio com máquinas de estado e autorização baseada em contexto (não em papéis fixos de usuário).
 
 ## Stack
 
+**Backend**
 - Java 21
-- Spring Boot
+- Spring Boot (Web, Data JPA, Validation)
 - Hibernate / JPA
 - PostgreSQL
-- REST API
 - Lombok
+- JUnit 5 + Mockito
+
+**Frontend** (pasta [`frontend`](./frontend))
+- React 19 + TypeScript
+- Vite
+
+## Como rodar
+
+### Backend
+
+Pré-requisitos: Java 21 e um banco PostgreSQL com o schema de [`docs/database_schema_reference.md`](./docs/database_schema_reference.md) (o Hibernate roda com `ddl-auto=validate` e não cria tabelas).
+
+Defina as variáveis de ambiente da conexão:
+
+| Variável | Exemplo |
+|---|---|
+| `DB_HOST` | `ep-xxxx.us-east-2.aws.neon.tech` |
+| `DB_NAME` | `neondb` |
+| `DB_USERNAME` | usuário do banco |
+| `DB_PASSWORD` | senha do banco |
+
+```bash
+./mvnw spring-boot:run   # sobe a API em http://localhost:8080
+./mvnw test              # roda os testes de unidade
+```
+
+### Frontend
+
+Com a API rodando:
+
+```bash
+cd frontend
+npm install
+npm run dev              # abre em http://localhost:5173
+```
+
+Detalhes no [README do frontend](./frontend/README.md).
+
+## Endpoints
+
+| Método | Rota | Ação |
+|---|---|---|
+| `POST` | `/subjects` | sugerir matéria |
+| `PATCH` | `/subjects/{id}/approve` · `/reject` | aprovar / rejeitar matéria |
+| `POST` | `/tutoring-bonds` | pedir vínculo de monitoria |
+| `PATCH` | `/tutoring-bonds/{id}/approve` · `/reject` · `/revoke` | aprovar / rejeitar / revogar vínculo |
+| `POST` | `/sessions` | criar sessão |
+| `PATCH` | `/sessions/{id}/cancel` | cancelar sessão |
+| `POST` | `/sessions/{id}/enrollments` | matricular |
+| `PATCH` | `/enrollments/{id}/cancel` | cancelar matrícula |
+
+Códigos de resposta: **201** ao criar, **200** ao alterar, **400** requisição inválida, **403** sem permissão, **404** não encontrado, **409** conflito com o estado atual. Erros inesperados devolvem um 500 genérico, sem detalhes internos. Exemplos executáveis em [`http/`](./http).
 
 ## O problema
 
@@ -40,7 +92,7 @@ O domínio foi modelado por completo antes de qualquer linha de código. Diagram
 
 ## Status atual
 
-🚧 Em desenvolvimento — rumo à versão 1.0.
+✅ **Versão 1.1 concluída** (backend + frontend). Próximo passo: v2.0.
 
 - [x] Modelagem de domínio completa (diagramas ER, classes, fluxos de negócio)
 - [x] Schema de banco de dados desenhado e documentado
@@ -62,13 +114,28 @@ O domínio foi modelado por completo antes de qualquer linha de código. Diagram
 - [x] Cascata de revogação: revogar um vínculo cancela suas sessões futuras e ativas (`cancelFutureSessions` com derived query, `revokeTutoringBond` transacional) + testes
 - [x] `enroll` (bloqueio de duplicidade, confirmação ou lista de espera, sessão lotada) + testes
 - [x] `cancelEnrollment` (só o próprio aluno cancela; promoção automática do primeiro da lista de espera, reordenação da fila sem buracos e notificação `SPOT_PROMOTED` ao promovido, tudo em `@Transactional`) + testes
-- [ ] Controller de Session/Enrollment + arquivo `.http` — em andamento: DTOs de requisição e endpoint `POST /sessions` prontos
-- [ ] Fechamento da versão 1.0
+- [x] Controllers de Session e Enrollment (`SessionController` para sessões e matrículas, `EnrollmentController` para cancelar matrícula, seguindo aninhamento raso de rotas) + `http/session.http` cobrindo o fluxo completo contra o banco real
+- [x] Senha fora das respostas da API (`@JsonIgnore` no `passwordHash`, como solução provisória até os DTOs de resposta)
+- [x] **Versão 1.0** fechada com tag e release no GitHub
+- [x] Frontend em React + TypeScript + Vite, com telas de matérias, vínculos e sessões/matrículas, e CORS configurado no backend
+- [x] Dois ciclos de testes manuais de ponta a ponta pelo frontend, que revelaram e motivaram as correções abaixo
+- [x] Matéria com nome repetido → 409 (antes: 500 com SQL exposto na resposta)
+- [x] Tratamento genérico de erros: conflitos de integridade → 409, erros inesperados → 500 genérico com log, sem vazar detalhes internos
+- [x] Vínculo de monitoria só em matéria aprovada → 409
+- [x] Endpoints de criação devolvendo 201 Created
+- [x] Validação de entrada nos DTOs com Bean Validation (`@NotNull`, `@NotBlank`, `@Size`, `@Min` + `@Valid`) → 400
+- [x] Testes de unidade do `SubjectService` e do `requestTutoringBond` (61 testes no total)
+- [x] **Versão 1.1**: frontend + correções de validação e tratamento de erros
 - [ ] Segurança/autenticação (para extrair o usuário logado em vez de recebê-lo no corpo da requisição) — v2.0
-- [ ] Dockerização da aplicação (planejada para o final do projeto, junto com autenticação) — v2.0
-- [ ] Corrigir exposição de dados sensíveis nas respostas da API (senha aparecendo em objetos aninhados; será resolvido com DTOs de resposta) — v2.0
-- [ ] Concorrência na matrícula: dois alunos disputando a última vaga ao mesmo tempo podem ser confirmados juntos (exige lock no banco) — v2.0
 - [ ] Papéis de usuário (admin): hoje `User` não tem papel, então as ações "de admin" não verificam nada e o cancelamento de matrícula por admin ficou de fora — v2.0
+- [ ] Endpoints `GET` (listar matérias, vínculos, sessões e matrículas) — v2.0
+- [ ] DTOs de resposta no lugar das entidades JPA (substituem o `@JsonIgnore` provisório) — v2.0
+- [ ] Cancelar uma sessão (ou revogar o vínculo) deve cancelar também as matrículas dela e notificar os alunos; hoje elas ficam `CONFIRMED`/`WAITLISTED` — v2.0
+- [ ] Impedir que o monitor se matricule na própria sessão — v2.0
+- [ ] Normalizar nomes de matéria (maiúsculas e acentos) antes de checar duplicidade — v2.0
+- [ ] Concorrência na matrícula: dois alunos disputando a última vaga ao mesmo tempo podem ser confirmados juntos (exige lock no banco) — v2.0
+- [ ] Separar banco de desenvolvimento/testes do banco "real" — v2.0
+- [ ] Dockerização da aplicação (planejada para o final do projeto, junto com autenticação) — v2.0
 
 ### Convenções de processo adotadas
 
@@ -81,3 +148,4 @@ O domínio foi modelado por completo antes de qualquer linha de código. Diagram
 - **Configuração de conexão:** via variáveis de ambiente (host, nome do banco, usuário, senha), nunca commitadas no repositório
 - **Lombok:** usado para reduzir código repetitivo (getters, setters, construtores) nas entidades e services
 - **HTTP Client (IntelliJ Ultimate):** usado para testar os endpoints REST, com arquivos `.http` versionados na pasta `http/`
+- **Node.js + Vite:** ambiente de desenvolvimento do frontend

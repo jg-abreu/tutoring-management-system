@@ -1,32 +1,54 @@
-# React + TypeScript + Vite
+# Frontend — Sistema de Monitoria
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Interface web da API de monitoria acadêmica. Cobre o fluxo completo do sistema no navegador: sugerir e aprovar matérias, pedir e avaliar vínculos de monitoria, criar e cancelar sessões, matricular alunos e cancelar matrículas (com lista de espera).
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **React 19** + **TypeScript**
+- **Vite** (servidor de desenvolvimento e build)
+- **oxlint** (lint)
+- Sem bibliotecas de UI, estado ou HTTP: `fetch` nativo, Context API, CSS puro com variáveis e modo escuro automático
 
-## React Compiler
+## Como rodar
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Pré-requisitos: Node.js 20+ e a API rodando em `http://localhost:8080` (ver o README da raiz).
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Abra `http://localhost:5173`. A API já libera essa origem via CORS (`CorsConfig`).
+
+Para apontar para outra API, crie um arquivo `.env.local` com:
+
+```
+VITE_API_URL=http://outro-host:8080
+```
+
+Outros comandos:
+
+| Comando | O que faz |
+|---|---|
+| `npm run build` | checagem de tipos + build de produção em `dist/` |
+| `npm run lint` | lint com oxlint |
+| `npm run preview` | serve o build de produção localmente |
+
+## Estrutura
+
+```
+src/
+├── api/          cliente HTTP central e uma função por endpoint da API
+├── components/   componentes reutilizáveis (badge de status, mensagens, seletor de usuário)
+├── config/       dados de teste provisórios (usuários e registros do banco)
+├── context/      estado compartilhado (usuário atual, registros conhecidos)
+├── features/     uma pasta por tela: subjects, bonds, sessions
+├── hooks/        useLocalStorage, useApiAction
+└── lib/          formatação de datas e fusos
+```
+
+## Limitações conhecidas (planejadas para a v2.0)
+
+- **Sem login:** o seletor "Agindo como" escolhe o usuário que executa cada ação; a lista de usuários fica fixa em `src/config/testData.ts`, apontando para registros do banco de desenvolvimento.
+- **A API ainda não tem endpoints `GET`:** as listas mostram só o que foi criado ou alterado pela própria tela (guardado no `localStorage`). Mudanças feitas pelo servidor em outros registros — como a promoção automática da lista de espera ou o cancelamento em cascata — não aparecem até existir uma forma de consultá-las.
+- **Sem papéis de usuário:** os botões de aprovar/rejeitar aparecem para qualquer usuário; quem decide é a API.
