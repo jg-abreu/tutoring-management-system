@@ -50,6 +50,81 @@ npm run dev              # abre em http://localhost:5173
 
 Detalhes no [README do frontend](./frontend/README.md).
 
+## Como usar (passo a passo)
+
+O fluxo completo do sistema, do zero até uma sessão com lista de espera, feito pelo frontend em `http://localhost:5173`.
+
+### 0. Preparar os usuários (só na primeira vez, num banco novo)
+
+Ainda não existe cadastro nem login (planejados para a v2.0), então os usuários são inseridos direto no banco. Rode no seu PostgreSQL:
+
+```sql
+INSERT INTO users (id, email, password_hash)
+VALUES
+    (gen_random_uuid(), 'monitor@teste.com', 'sem-login-na-v1'),
+    (gen_random_uuid(), 'admin@teste.com',   'sem-login-na-v1'),
+    (gen_random_uuid(), 'aluno1@teste.com',  'sem-login-na-v1'),
+    (gen_random_uuid(), 'aluno2@teste.com',  'sem-login-na-v1'),
+    (gen_random_uuid(), 'aluno3@teste.com',  'sem-login-na-v1')
+RETURNING id, email;
+```
+
+Copie os UUIDs devolvidos para a lista `TEST_USERS` em [`frontend/src/config/testData.ts`](./frontend/src/config/testData.ts). Nesse mesmo arquivo, esvazie `KNOWN_SUBJECTS` e `KNOWN_BONDS`: eles apontam para registros do banco de desenvolvimento do autor.
+
+### 1. Escolher quem está agindo
+
+No topo da tela, o seletor **"Agindo como"** define qual usuário executa cada ação (ele faz o papel do login). Troque de usuário sempre que o passo pedir.
+
+### 2. Criar uma matéria (aba "1. Matérias")
+
+1. Como **qualquer usuário**, sugira uma matéria (ex.: "Álgebra Linear"). Ela nasce **Pendente**.
+2. Troque para o **admin** e clique em **Aprovar**. Só matérias aprovadas aceitam monitores.
+
+### 3. Tornar alguém monitor (aba "2. Vínculos")
+
+1. Como o **futuro monitor**, escolha a matéria aprovada e clique em **Pedir**. O vínculo nasce **Pendente**.
+2. Como **admin**, clique em **Aprovar**. A partir daí, esse usuário é monitor *daquela* matéria, e o admin que aprovou passa a ser o **avaliador** do vínculo.
+
+O papel de monitor é por matéria: o mesmo usuário pode ser monitor em uma matéria e aluno em outra.
+
+### 4. Criar uma sessão (aba "3. Sessões")
+
+1. Como o **monitor** (ou o avaliador do vínculo), escolha o vínculo aprovado.
+2. Defina início, fim e capacidade, e marque **"Permite lista de espera"** se quiser fila quando lotar.
+
+### 5. Matricular alunos
+
+1. Troque para um **aluno** e clique em **Matricular** no card da sessão. Com vaga livre, a matrícula fica **Confirmada**.
+2. Com a sessão lotada, os próximos alunos entram na **lista de espera**, com a posição na fila (#1, #2...). Sem lista de espera, a API recusa a matrícula.
+
+### 6. Cancelar uma matrícula
+
+Como o **próprio aluno**, clique em **Cancelar** na matrícula dele. Se ele estava confirmado, o primeiro da fila é **promovido** automaticamente, a fila é renumerada e o promovido recebe uma notificação.
+
+### 7. Cancelar a sessão ou revogar o vínculo
+
+- **Cancelar sessão:** só o **avaliador** do vínculo (o admin que aprovou).
+- **Revogar vínculo** (aba 2, como admin): o monitor perde o vínculo e **todas as sessões futuras** dele são canceladas em cascata.
+
+### Quem pode fazer o quê
+
+| Ação | Quem |
+|---|---|
+| Sugerir matéria | qualquer usuário |
+| Aprovar/rejeitar matéria e vínculo, revogar vínculo | admin (na v1 ainda não há papéis: a API aceita qualquer usuário existente) |
+| Pedir vínculo de monitoria | qualquer usuário, em matéria aprovada |
+| Criar sessão | o monitor (requester) ou o avaliador do vínculo aprovado |
+| Cancelar sessão | só o avaliador do vínculo |
+| Matricular | qualquer usuário, em sessão ativa |
+| Cancelar matrícula | só o próprio aluno |
+
+### Limitações da v1 que você vai notar
+
+- A API ainda não tem endpoints `GET`, então as listas mostram **só o que a própria tela criou** (guardado no navegador). Mudanças feitas pelo servidor em outros registros, como a promoção da fila e a cascata da revogação, não aparecem na tela, embora aconteçam no banco.
+- O botão **"Limpar dados locais"**, no aviso amarelo, apaga essas listas do navegador. Ele não apaga nada do banco.
+
+**Sem o frontend:** o arquivo [`http/session.http`](./http/session.http) executa o mesmo fluxo de sessões e matrículas direto na API, com o HTTP Client do IntelliJ.
+
 ## Endpoints
 
 | Método | Rota | Ação |
