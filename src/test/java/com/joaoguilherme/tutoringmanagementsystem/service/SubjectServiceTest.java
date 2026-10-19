@@ -98,7 +98,7 @@ public class SubjectServiceTest {
         when(userRepository.findById(admin.getId())).thenReturn(Optional.of(admin));
         when(subjectRepository.save(any(Subject.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Subject approved = subjectService.approveSubject(admin.getId(), subject.getId());
+        Subject approved = subjectService.approveSubject(subject.getId(), admin.getId());
 
         Assertions.assertEquals(SubjectStatus.APPROVED, approved.getStatus());
         Assertions.assertEquals(admin, approved.getEvaluator());
@@ -110,7 +110,7 @@ public class SubjectServiceTest {
 
         when(subjectRepository.findById(subjectUuid)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(SubjectNotFoundException.class, () -> subjectService.approveSubject(UUID.randomUUID(), subjectUuid));
+        Assertions.assertThrows(SubjectNotFoundException.class, () -> subjectService.approveSubject(subjectUuid, UUID.randomUUID()));
 
         verifyNoInteractions(userRepository);
     }
@@ -121,7 +121,7 @@ public class SubjectServiceTest {
 
         when(subjectRepository.findById(subject.getId())).thenReturn(Optional.of(subject));
 
-        Assertions.assertThrows(InvalidSubjectStatusException.class, () -> subjectService.approveSubject(UUID.randomUUID(), subject.getId()));
+        Assertions.assertThrows(InvalidSubjectStatusException.class, () -> subjectService.approveSubject(subject.getId(), UUID.randomUUID()));
 
         verify(subjectRepository, never()).save(any(Subject.class));
     }
@@ -134,7 +134,7 @@ public class SubjectServiceTest {
         when(subjectRepository.findById(subject.getId())).thenReturn(Optional.of(subject));
         when(userRepository.findById(adminUuid)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(UserNotFoundException.class, () -> subjectService.approveSubject(adminUuid, subject.getId()));
+        Assertions.assertThrows(UserNotFoundException.class, () -> subjectService.approveSubject(subject.getId(), adminUuid));
 
         verify(subjectRepository, never()).save(any(Subject.class));
     }
@@ -148,7 +148,7 @@ public class SubjectServiceTest {
         when(userRepository.findById(admin.getId())).thenReturn(Optional.of(admin));
         when(subjectRepository.save(any(Subject.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Subject rejected = subjectService.rejectSubject(admin.getId(), subject.getId());
+        Subject rejected = subjectService.rejectSubject(subject.getId(), admin.getId());
 
         Assertions.assertEquals(SubjectStatus.REJECTED, rejected.getStatus());
         Assertions.assertEquals(admin, rejected.getEvaluator());
@@ -160,7 +160,7 @@ public class SubjectServiceTest {
 
         when(subjectRepository.findById(subjectUuid)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(SubjectNotFoundException.class, () -> subjectService.rejectSubject(UUID.randomUUID(), subjectUuid));
+        Assertions.assertThrows(SubjectNotFoundException.class, () -> subjectService.rejectSubject(subjectUuid, UUID.randomUUID()));
 
         verifyNoInteractions(userRepository);
     }
@@ -171,7 +171,7 @@ public class SubjectServiceTest {
 
         when(subjectRepository.findById(subject.getId())).thenReturn(Optional.of(subject));
 
-        Assertions.assertThrows(InvalidSubjectStatusException.class, () -> subjectService.rejectSubject(UUID.randomUUID(), subject.getId()));
+        Assertions.assertThrows(InvalidSubjectStatusException.class, () -> subjectService.rejectSubject(subject.getId(), UUID.randomUUID()));
 
         verify(subjectRepository, never()).save(any(Subject.class));
     }
@@ -184,7 +184,7 @@ public class SubjectServiceTest {
         when(subjectRepository.findById(subject.getId())).thenReturn(Optional.of(subject));
         when(userRepository.findById(adminUuid)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(UserNotFoundException.class, () -> subjectService.rejectSubject(adminUuid, subject.getId()));
+        Assertions.assertThrows(UserNotFoundException.class, () -> subjectService.rejectSubject(subject.getId(), adminUuid));
 
         verify(subjectRepository, never()).save(any(Subject.class));
     }

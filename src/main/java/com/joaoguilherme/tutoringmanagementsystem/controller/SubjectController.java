@@ -26,11 +26,11 @@ public class SubjectController {
 
     @PatchMapping("/{subjectUuid}/approve")
     public Subject approveSubject(@PathVariable UUID subjectUuid, @Valid @RequestBody AdminActionRequest request) {
-        return subjectService.approveSubject(request.adminUuid(), subjectUuid);
+        return subjectService.approveSubject(subjectUuid, request.adminUuid());
     }
 
     @PatchMapping("/{subjectUuid}/reject")
     public Subject rejectSubject(@PathVariable UUID subjectUuid, @Valid @RequestBody AdminActionRequest request) {
-        return subjectService.rejectSubject(request.adminUuid(), subjectUuid);
+        return subjectService.rejectSubject(subjectUuid, request.adminUuid());
     }
 }
