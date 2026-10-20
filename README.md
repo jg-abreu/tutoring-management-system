@@ -242,7 +242,7 @@ See the [frontend README](frontend/README.md) for its structure and commands.
 
 - [x] **v1.0** — domain model, all business flows, error handling and unit tests
 - [x] **v1.1** — React frontend, input validation and error handling fixes
-- [x] Docker Compose setup and CI
+- [x] **v1.2** — Docker Compose setup, CI and English translation
 - [ ] **v2.0**
   - Authentication, with the acting user taken from the token instead of the request body
   - User roles, so admin-only actions are actually restricted

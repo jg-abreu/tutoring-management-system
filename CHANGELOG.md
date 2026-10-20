@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-20
+
 ### Added
 - Docker Compose setup that runs PostgreSQL (with schema and sample data), the API and the frontend with a single command.
 - GitHub Actions CI running the backend test suite against PostgreSQL and the frontend lint and build.
@@ -43,6 +45,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Centralized error handling mapping domain exceptions to `400`, `403`, `404` and `409`.
 - Unit tests with JUnit 5 and Mockito for every service.
 
-[Unreleased]: https://github.com/jg-abreu/tutoring-management-system/compare/v1.1...HEAD
+[Unreleased]: https://github.com/jg-abreu/tutoring-management-system/compare/v1.2...HEAD
+[1.2.0]: https://github.com/jg-abreu/tutoring-management-system/compare/v1.1...v1.2
 [1.1.0]: https://github.com/jg-abreu/tutoring-management-system/compare/v1.0...v1.1
 [1.0.0]: https://github.com/jg-abreu/tutoring-management-system/releases/tag/v1.0
