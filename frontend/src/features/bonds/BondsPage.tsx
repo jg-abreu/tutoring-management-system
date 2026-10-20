@@ -13,9 +13,9 @@ import { shortId } from '../../lib/format'
 type Decision = 'approve' | 'reject' | 'revoke'
 
 const DECISION_TEXT: Record<Decision, string> = {
-  approve: 'aprovado',
-  reject: 'rejeitado',
-  revoke: 'revogado (sessões futuras canceladas)',
+  approve: 'approved',
+  reject: 'rejected',
+  revoke: 'revoked (future sessions cancelled)',
 }
 
 export function BondsPage() {
@@ -36,7 +36,7 @@ export function BondsPage() {
     run(async () => {
       const bond = await bondsApi.request(subjectUuid.trim(), user.id)
       saveBond(bond)
-      return `Vínculo de ${user.label} em "${bond.subject.name}" pedido. Agora um admin precisa aprovar.`
+      return `Tutoring bond for ${user.label} in "${bond.subject.name}" requested. Now an admin needs to approve it.`
     })
   }
 
@@ -44,7 +44,7 @@ export function BondsPage() {
     run(async () => {
       const updated = await bondsApi[decision](bond.id, user.id)
       saveBond(updated)
-      return `Vínculo ${DECISION_TEXT[decision]}.`
+      return `Tutoring bond ${DECISION_TEXT[decision]}.`
     })
 
   const list = newestFirst(bonds)
@@ -54,23 +54,23 @@ export function BondsPage() {
       <Feedback message={feedback} onClose={clearFeedback} />
 
       <form className="card form" onSubmit={handleRequest}>
-        <h2>Pedir vínculo de monitoria</h2>
+        <h2>Request a tutoring bond</h2>
         <UuidInput
-          label="Matéria (precisa estar aprovada)"
+          label="Subject (must be approved)"
           value={subjectUuid}
           onChange={setSubjectUuid}
           options={approvedSubjects}
         />
         <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={busy}>
-            Pedir como {user.label}
+            Request as {user.label}
           </button>
         </div>
       </form>
 
-      <h2>Vínculos ({list.length})</h2>
+      <h2>Tutoring bonds ({list.length})</h2>
       {list.length === 0 ? (
-        <p className="muted">Nenhum vínculo pedido ou avaliado por esta tela ainda.</p>
+        <p className="muted">No tutoring bonds requested or evaluated from this screen yet.</p>
       ) : (
         list.map((bond) => (
           <article key={bond.id} className="card row-card">
@@ -79,27 +79,27 @@ export function BondsPage() {
                 {userLabel(bond.requester.id)} · {bond.subject.name}
               </h3>
               <p className="muted">
-                {bond.evaluator ? `avaliado por ${userLabel(bond.evaluator.id)} · ` : ''}
+                {bond.evaluator ? `evaluated by ${userLabel(bond.evaluator.id)} · ` : ''}
                 <span className="mono" title={bond.id}>
                   {shortId(bond.id)}
                 </span>
               </p>
             </div>
-            <StatusBadge status={bond.status} masculine />
+            <StatusBadge status={bond.status} />
             <div className="row-actions">
               {bond.status === 'PENDING' && (
                 <>
                   <button type="button" className="btn btn-small btn-primary" disabled={busy} onClick={() => decide(bond, 'approve')}>
-                    Aprovar
+                    Approve
                   </button>
                   <button type="button" className="btn btn-small btn-danger" disabled={busy} onClick={() => decide(bond, 'reject')}>
-                    Rejeitar
+                    Reject
                   </button>
                 </>
               )}
               {bond.status === 'APPROVED' && (
                 <button type="button" className="btn btn-small btn-danger" disabled={busy} onClick={() => decide(bond, 'revoke')}>
-                  Revogar
+                  Revoke
                 </button>
               )}
             </div>

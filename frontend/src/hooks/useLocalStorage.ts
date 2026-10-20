@@ -14,7 +14,7 @@ export function useLocalStorage<T>(key: string, initial: T) {
     try {
       localStorage.setItem(key, JSON.stringify(value))
     } catch {
-      // armazenamento indisponível (aba anônima, cota cheia): segue só em memória
+      // storage unavailable (private tab, quota exceeded): keep it in memory only
     }
   }, [key, value])
 

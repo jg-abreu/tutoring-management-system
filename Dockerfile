@@ -1,13 +1,13 @@
-# Imagem da API. Etapa 1 compila com Maven; etapa 2 só roda o .jar.
+# API image. Stage 1 builds with Maven; stage 2 just runs the .jar.
 
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
-# Baixa as dependências antes de copiar o código, para o Docker reaproveitar
-# essa camada enquanto o pom.xml não mudar.
+# Downloads dependencies before copying the source, so Docker can reuse
+# this layer as long as pom.xml doesn't change.
 COPY pom.xml .
 RUN mvn -q -B dependency:go-offline
 COPY src ./src
-# Os testes rodam fora do Docker (o contextLoads precisa de um banco).
+# Tests run outside Docker (contextLoads needs a database).
 RUN mvn -q -B package -DskipTests
 
 FROM eclipse-temurin:21-jre

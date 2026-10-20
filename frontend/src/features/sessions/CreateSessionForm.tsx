@@ -39,33 +39,33 @@ export function CreateSessionForm({ userUuid, userLabel, bondOptions, busy, onSu
 
   return (
     <form className="card form" onSubmit={handleSubmit}>
-      <h2>Nova sessão</h2>
+      <h2>New session</h2>
 
-      <UuidInput label="Vínculo (precisa estar aprovado)" value={bondUuid} onChange={setBondUuid} options={bondOptions} />
+      <UuidInput label="Tutoring bond (must be approved)" value={bondUuid} onChange={setBondUuid} options={bondOptions} />
 
       <label className="field">
-        <span>Início</span>
+        <span>Start</span>
         <input type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} required />
       </label>
 
       <label className="field">
-        <span>Fim</span>
+        <span>End</span>
         <input type="datetime-local" value={end} onChange={(e) => setEnd(e.target.value)} required />
       </label>
 
       <label className="field">
-        <span>Capacidade</span>
+        <span>Capacity</span>
         <input type="number" min={1} value={spots} onChange={(e) => setSpots(Number(e.target.value))} required />
       </label>
 
       <label className="field field-check">
         <input type="checkbox" checked={allowsWaitlist} onChange={(e) => setAllowsWaitlist(e.target.checked)} />
-        <span>Permite lista de espera</span>
+        <span>Allow waitlist</span>
       </label>
 
       <div className="form-actions">
         <button type="submit" className="btn btn-primary" disabled={busy}>
-          Criar sessão como {userLabel}
+          Create session as {userLabel}
         </button>
       </div>
     </form>

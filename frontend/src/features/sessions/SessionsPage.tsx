@@ -13,8 +13,8 @@ export function SessionsPage() {
   const { bonds, sessions, enrollments, saveSession, saveEnrollment } = useKnownData()
   const { busy, feedback, run, clearFeedback } = useApiAction()
 
-  // Só os vínculos aprovados em que o usuário atual pode criar sessão
-  // (a API aceita o requester ou o evaluator do vínculo).
+  // Only approved bonds where the current user can create sessions
+  // (the API accepts the bond's requester or evaluator).
   const canUse = (requesterId: string, evaluatorId?: string | null) =>
     requesterId === user.id || evaluatorId === user.id
 
@@ -28,13 +28,13 @@ export function SessionsPage() {
   const handleCreate = (input: CreateSessionInput) =>
     run(async () => {
       saveSession(await sessionsApi.create(input))
-      return 'Sessão criada.'
+      return 'Session created.'
     })
 
   const handleCancelSession = (session: Session) =>
     run(async () => {
       saveSession(await sessionsApi.cancel(session.id, user.id))
-      return 'Sessão cancelada.'
+      return 'Session cancelled.'
     })
 
   const handleEnroll = (session: Session) =>
@@ -42,14 +42,14 @@ export function SessionsPage() {
       const enrollment = await sessionsApi.enroll(session.id, user.id)
       saveEnrollment(enrollment)
       return enrollment.status === 'WAITLISTED'
-        ? `${user.label} entrou na lista de espera (posição ${enrollment.queuePosition}).`
-        : `${user.label} matriculado(a).`
+        ? `${user.label} joined the waitlist (position ${enrollment.queuePosition}).`
+        : `${user.label} enrolled.`
     })
 
   const handleCancelEnrollment = (enrollment: Enrollment) =>
     run(async () => {
       saveEnrollment(await sessionsApi.cancelEnrollment(enrollment.id, user.id))
-      return `Matrícula de ${userLabel(enrollment.student.id)} cancelada.`
+      return `Enrollment of ${userLabel(enrollment.student.id)} cancelled.`
     })
 
   const sessionList = newestFirst(sessions)
@@ -68,9 +68,9 @@ export function SessionsPage() {
         onSubmit={handleCreate}
       />
 
-      <h2>Sessões ({sessionList.length})</h2>
+      <h2>Sessions ({sessionList.length})</h2>
       {sessionList.length === 0 ? (
-        <p className="muted">Nenhuma sessão criada por esta tela ainda.</p>
+        <p className="muted">No sessions created from this screen yet.</p>
       ) : (
         sessionList.map((session) => (
           <SessionCard

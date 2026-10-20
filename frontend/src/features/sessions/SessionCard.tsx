@@ -30,7 +30,7 @@ export function SessionCard({
         <div>
           <h3>{session.bond.subject.name}</h3>
           <p className="muted">
-            {formatRange(session.startTime, session.endTime)} · monitor {userLabel(session.bond.requester.id)}
+            {formatRange(session.startTime, session.endTime)} · tutor {userLabel(session.bond.requester.id)}
           </p>
         </div>
         <StatusBadge status={session.status} />
@@ -38,12 +38,12 @@ export function SessionCard({
 
       <dl className="session-facts">
         <div>
-          <dt>Capacidade</dt>
+          <dt>Capacity</dt>
           <dd>{session.spots}</dd>
         </div>
         <div>
-          <dt>Lista de espera</dt>
-          <dd>{session.allowsWaitlist ? 'Sim' : 'Não'}</dd>
+          <dt>Waitlist</dt>
+          <dd>{session.allowsWaitlist ? 'Yes' : 'No'}</dd>
         </div>
         <div>
           <dt>ID</dt>
@@ -56,17 +56,17 @@ export function SessionCard({
       {active && (
         <div className="session-actions">
           <button type="button" className="btn btn-primary" disabled={busy} onClick={onEnroll}>
-            Matricular {userLabel(currentUserId)}
+            Enroll {userLabel(currentUserId)}
           </button>
           <button type="button" className="btn btn-danger" disabled={busy} onClick={onCancelSession}>
-            Cancelar sessão
+            Cancel session
           </button>
         </div>
       )}
 
-      <h4>Matrículas feitas por esta tela</h4>
+      <h4>Enrollments made from this screen</h4>
       {enrollments.length === 0 ? (
-        <p className="muted">Nenhuma ainda.</p>
+        <p className="muted">None yet.</p>
       ) : (
         <ul className="enrollment-list">
           {enrollments.map((enrollment) => (
@@ -83,7 +83,7 @@ export function SessionCard({
                   disabled={busy}
                   onClick={() => onCancelEnrollment(enrollment)}
                 >
-                  Cancelar como {userLabel(currentUserId)}
+                  Cancel as {userLabel(currentUserId)}
                 </button>
               )}
             </li>

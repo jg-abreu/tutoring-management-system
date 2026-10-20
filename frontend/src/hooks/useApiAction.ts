@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { ApiError } from '../api/client'
 import type { FeedbackMessage } from '../components/Feedback'
 
-// Executa uma chamada à API controlando "ocupado" e a mensagem de sucesso/erro.
-// A ação devolve o texto de sucesso; erros da API viram "Erro <status>: <mensagem>".
+// Runs an API call, tracking the "busy" state and the success/error message.
+// The action returns the success text; API errors become "Error <status>: <message>".
 export function useApiAction() {
   const [busy, setBusy] = useState(false)
   const [feedback, setFeedback] = useState<FeedbackMessage | null>(null)
@@ -14,9 +14,9 @@ export function useApiAction() {
     try {
       setFeedback({ kind: 'success', text: await action() })
     } catch (error) {
-      let text = 'Erro inesperado.'
+      let text = 'Unexpected error.'
       if (error instanceof ApiError) {
-        text = error.status ? `Erro ${error.status}: ${error.message}` : error.message
+        text = error.status ? `Error ${error.status}: ${error.message}` : error.message
       }
       setFeedback({ kind: 'error', text })
     } finally {

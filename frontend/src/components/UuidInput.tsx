@@ -9,8 +9,8 @@ type Props = {
   options: UuidOption[]
 }
 
-// Campo de UUID com sugestões. As sugestões vêm do que o frontend já conhece;
-// ainda dá para colar um UUID qualquer do banco (não há GET para buscar a lista).
+// UUID field with suggestions. Suggestions come from what the frontend already knows;
+// any UUID from the database can still be pasted in (there is no GET to fetch the list).
 export function UuidInput({ label, value, onChange, options }: Props) {
   const listId = useId()
 
@@ -22,7 +22,7 @@ export function UuidInput({ label, value, onChange, options }: Props) {
         list={listId}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Escolha da lista ou cole um UUID"
+        placeholder="Pick from the list or paste a UUID"
         required
       />
       <datalist id={listId}>

@@ -1,12 +1,12 @@
-# Imagem do frontend. Etapa 1 gera o build de produção; etapa 2 serve com nginx.
+# Frontend image. Stage 1 builds for production; stage 2 serves it with nginx.
 
 FROM node:22-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
-# O navegador chama /api no próprio nginx, que repassa para a API (ver nginx.conf).
-# Assim frontend e API ficam na mesma origem e não há CORS envolvido.
+# The browser calls /api on nginx itself, which forwards to the API (see nginx.conf).
+# That way frontend and API share the same origin and CORS isn't involved.
 ENV VITE_API_URL=/api
 RUN npm run build
 
