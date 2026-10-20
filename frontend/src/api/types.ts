@@ -1,4 +1,4 @@
-// Formatos devolvidos pela API (as entidades JPA serializadas pelo Jackson).
+// Shapes returned by the API (JPA entities serialized by Jackson).
 
 export type User = {
   id: string

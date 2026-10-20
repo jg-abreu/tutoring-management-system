@@ -1,34 +1,23 @@
-// Matéria, sessão e matrícula são substantivos femininos; vínculo é masculino.
-const FEMININE: Record<string, string> = {
-  ACTIVE: 'Ativa',
-  CANCELLED: 'Cancelada',
-  CONFIRMED: 'Confirmada',
-  WAITLISTED: 'Lista de espera',
-  REJECTED: 'Rejeitada',
-  PENDING: 'Pendente',
-  APPROVED: 'Aprovada',
-  REVOKED: 'Revogada',
-}
-
-const MASCULINE: Record<string, string> = {
-  ...FEMININE,
-  REJECTED: 'Rejeitado',
-  APPROVED: 'Aprovado',
-  REVOKED: 'Revogado',
+const LABELS: Record<string, string> = {
+  ACTIVE: 'Active',
+  CANCELLED: 'Cancelled',
+  CONFIRMED: 'Confirmed',
+  WAITLISTED: 'Waitlisted',
+  REJECTED: 'Rejected',
+  PENDING: 'Pending',
+  APPROVED: 'Approved',
+  REVOKED: 'Revoked',
 }
 
 type Props = {
   status: string
   suffix?: string
-  masculine?: boolean
 }
 
-export function StatusBadge({ status, suffix, masculine = false }: Props) {
-  const labels = masculine ? MASCULINE : FEMININE
-
+export function StatusBadge({ status, suffix }: Props) {
   return (
     <span className={`badge badge-${status.toLowerCase()}`}>
-      {labels[status] ?? status}
+      {LABELS[status] ?? status}
       {suffix ? ` ${suffix}` : ''}
     </span>
   )

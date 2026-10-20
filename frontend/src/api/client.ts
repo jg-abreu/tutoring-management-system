@@ -10,12 +10,12 @@ export class ApiError extends Error {
   }
 }
 
-// As regras de negócio (GlobalExceptionHandler) devolvem a mensagem como texto
-// puro. Erros que o Spring trata sozinho (validação dos DTOs, JSON malformado)
-// vêm como application/problem+json, com os campos "detail" e "title".
+// Business-rule errors (GlobalExceptionHandler) return the message as plain
+// text. Errors Spring handles on its own (DTO validation, malformed JSON) come
+// as application/problem+json, with "detail" and "title" fields.
 async function readErrorMessage(response: Response): Promise<string> {
   const text = await response.text()
-  if (!text) return response.statusText || 'Erro sem mensagem'
+  if (!text) return response.statusText || 'Error with no message'
   try {
     const body = JSON.parse(text)
     return body.detail || body.title || body.message || body.error || text
@@ -33,7 +33,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
       body: body === undefined ? undefined : JSON.stringify(body),
     })
   } catch {
-    throw new ApiError(0, `Não foi possível conectar à API em ${BASE_URL}. Ela está rodando?`)
+    throw new ApiError(0, `Could not connect to the API at ${BASE_URL}. Is it running?`)
   }
 
   if (!response.ok) {

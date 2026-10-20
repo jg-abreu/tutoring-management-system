@@ -1,5 +1,5 @@
-// "2026-11-20T14:00" (input datetime-local, sem fuso) -> "2026-11-20T14:00:00-03:00".
-// A API recebe OffsetDateTime, então o fuso do navegador precisa ir junto.
+// "2026-11-20T14:00" (datetime-local input, no offset) -> "2026-11-20T14:00:00-03:00".
+// The API expects an OffsetDateTime, so the browser's offset has to be sent along.
 export function toOffsetDateTime(localValue: string): string {
   const offsetMinutes = -new Date(localValue).getTimezoneOffset()
   const sign = offsetMinutes >= 0 ? '+' : '-'
@@ -9,12 +9,12 @@ export function toOffsetDateTime(localValue: string): string {
   return `${localValue}:00${sign}${hh}:${mm}`
 }
 
-const dateTimeFormat = new Intl.DateTimeFormat('pt-BR', {
+const dateTimeFormat = new Intl.DateTimeFormat('en-US', {
   dateStyle: 'short',
   timeStyle: 'short',
 })
 
-const timeFormat = new Intl.DateTimeFormat('pt-BR', { timeStyle: 'short' })
+const timeFormat = new Intl.DateTimeFormat('en-US', { timeStyle: 'short' })
 
 export function formatRange(start: string, end: string): string {
   return `${dateTimeFormat.format(new Date(start))} – ${timeFormat.format(new Date(end))}`

@@ -1,7 +1,7 @@
--- Schema do banco, igual ao descrito em docs/database_schema_reference.md.
--- O Postgres executa este arquivo sozinho na primeira subida do container
--- (só quando o volume de dados está vazio). O Hibernate roda com
--- ddl-auto=validate e apenas confere que tudo isto existe.
+-- Database schema, matching docs/database_schema_reference.md.
+-- Postgres runs this file automatically on the container's first startup
+-- (only when the data volume is empty). Hibernate runs with
+-- ddl-auto=validate and only checks that all of this exists.
 
 -- ENUMs
 CREATE TYPE subject_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
@@ -18,7 +18,7 @@ CREATE TYPE notification_event_type AS ENUM (
     'USER_DEACTIVATED'
 );
 
--- Tabelas, na ordem das foreign keys
+-- Tables, in foreign key order
 CREATE TABLE users (
     id            UUID PRIMARY KEY,
     email         VARCHAR(255) NOT NULL UNIQUE,
@@ -74,14 +74,14 @@ CREATE TABLE notification (
     created_at  TIMESTAMPTZ             NOT NULL DEFAULT NOW()
 );
 
--- Índices
+-- Indexes
 CREATE INDEX idx_enrollment_session_id ON enrollment (session_id);
 CREATE INDEX idx_enrollment_student_id ON enrollment (student_id);
 CREATE INDEX idx_tutoring_bond_subject_id ON tutoring_bond (subject_id);
 CREATE INDEX idx_notification_receiver_id ON notification (receiver_id);
 
--- Um mesmo monitor não pode ter dois vínculos "vivos" (PENDING ou APPROVED)
--- para a mesma matéria; rejeitados e revogados podem se repetir.
+-- The same tutor can't have two "live" bonds (PENDING or APPROVED)
+-- for the same subject; rejected and revoked ones may repeat.
 CREATE UNIQUE INDEX uq_tutoring_bond_active_requester_subject
     ON tutoring_bond (requester_id, subject_id)
     WHERE status IN ('PENDING', 'APPROVED');

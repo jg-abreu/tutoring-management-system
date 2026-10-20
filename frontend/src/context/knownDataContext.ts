@@ -3,8 +3,8 @@ import type { Enrollment, Session, Subject, TutoringBond } from '../api/types'
 
 export type ById<T> = Record<string, T>
 
-// PROVISÓRIO: sem GET na API, o frontend só conhece o que ele mesmo criou ou
-// alterou. Cada resposta de POST/PATCH é guardada aqui (e no navegador).
+// TEMPORARY: with no GET in the API, the frontend only knows what it created or
+// changed itself. Every POST/PATCH response is stored here (and in the browser).
 export type KnownData = {
   subjects: ById<Subject>
   bonds: ById<TutoringBond>
@@ -21,13 +21,13 @@ export const KnownDataContext = createContext<KnownData | null>(null)
 
 export function useKnownData() {
   const context = useContext(KnownDataContext)
-  if (!context) throw new Error('useKnownData precisa estar dentro de KnownDataProvider')
+  if (!context) throw new Error('useKnownData must be used inside KnownDataProvider')
   return context
 }
 
-// A API devolve createdAt com fusos diferentes conforme o caminho (recém-criado
-// vem com -03:00; lido do banco vem em UTC com Z), então comparar como texto
-// embaralha a ordem. Comparar como instante resolve.
+// The API returns createdAt with different offsets depending on the path (freshly
+// created comes with -03:00; read from the database comes in UTC with Z), so comparing
+// as text scrambles the order. Comparing as instants fixes it.
 const time = (iso: string) => new Date(iso).getTime()
 
 export function newestFirst<T extends { createdAt: string }>(items: ById<T>): T[] {

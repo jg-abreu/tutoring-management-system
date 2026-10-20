@@ -9,9 +9,9 @@ import { SubjectsPage } from './features/subjects/SubjectsPage'
 import { useLocalStorage } from './hooks/useLocalStorage'
 
 const TABS = [
-  { id: 'subjects', label: '1. Matérias', page: SubjectsPage },
-  { id: 'bonds', label: '2. Vínculos', page: BondsPage },
-  { id: 'sessions', label: '3. Sessões', page: SessionsPage },
+  { id: 'subjects', label: '1. Subjects', page: SubjectsPage },
+  { id: 'bonds', label: '2. Tutoring bonds', page: BondsPage },
+  { id: 'sessions', label: '3. Sessions', page: SessionsPage },
 ] as const
 
 type TabId = (typeof TABS)[number]['id']
@@ -26,12 +26,12 @@ function Shell() {
     <>
       <header className="app-header">
         <div className="app-title">
-          <h1>Monitoria</h1>
+          <h1>Tutoring</h1>
         </div>
         <UserSwitcher />
       </header>
 
-      <nav className="tabs" aria-label="Seções">
+      <nav className="tabs" aria-label="Sections">
         {TABS.map((tab) => (
           <button
             key={tab.id}
@@ -48,15 +48,15 @@ function Shell() {
       <main>
         <section className="notice">
           <div>
-            <strong>Limitação atual:</strong> a API ainda não tem endpoints <code>GET</code>. As listas mostram só o
-            que foi criado ou alterado por esta tela (guardado no navegador), e mudanças feitas pelo servidor em outros
-            registros — como a promoção da lista de espera — não aparecem sozinhas.
+            <strong>Current limitation:</strong> the API has no <code>GET</code> endpoints yet. The lists only show
+            what was created or changed from this screen (stored in the browser), and changes the server makes to other
+            records — such as waitlist promotions — don't show up on their own.
           </div>
           <button type="button" className="btn btn-small" onClick={clearAll}>
-            Limpar dados locais
+            Clear local data
           </button>
         </section>
-        {/* key: trocar de usuário remonta a tela, limpando a mensagem e os formulários */}
+        {/* key: switching users remounts the page, clearing the message and the forms */}
         <Page key={user.id} />
       </main>
     </>

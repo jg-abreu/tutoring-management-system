@@ -1,6 +1,6 @@
-# Sobe o sistema completo com dados de exemplo: docker compose up --build
+# Starts the full system with sample data: docker compose up --build
 # Frontend: http://localhost:3000 | API: http://localhost:8080 | Postgres: localhost:5433
-# Credenciais de desenvolvimento, só para este banco local (o banco real é outro).
+# Development credentials, only for this local database (the real database is a different one).
 
 services:
   db:
@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: tutoring
     volumes:
       - pgdata:/var/lib/postgresql/data
-      # Schema e seed: rodam só na primeira subida (volume vazio)
+      # Schema and seed: run only on the first startup (empty volume)
       - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
     ports:
       - "5433:5432"
@@ -24,7 +24,7 @@ services:
   api:
     build: .
     environment:
-      # Sobrescrevem as propriedades do application.properties (que apontam para o Neon)
+      # Override the application.properties settings (which point to Neon)
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/tutoring
       SPRING_DATASOURCE_USERNAME: tutoring
       SPRING_DATASOURCE_PASSWORD: tutoring

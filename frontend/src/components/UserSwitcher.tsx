@@ -6,7 +6,7 @@ export function UserSwitcher() {
 
   return (
     <label className="user-switcher">
-      <span>Agindo como</span>
+      <span>Acting as</span>
       <select value={user.id} onChange={(e) => setUserId(e.target.value)}>
         {TEST_USERS.map((u) => (
           <option key={u.id} value={u.id}>

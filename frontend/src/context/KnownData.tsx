@@ -9,8 +9,8 @@ export function KnownDataProvider({ children }: { children: ReactNode }) {
   const [sessions, setSessions] = useLocalStorage<ById<Session>>('knownSessions', {})
   const [enrollments, setEnrollments] = useLocalStorage<ById<Enrollment>>('knownEnrollments', {})
 
-  // As respostas trazem os objetos aninhados atualizados (ex.: a matrícula traz
-  // a sessão, que traz o vínculo, que traz a matéria), então salvamos em cascata.
+  // Responses carry updated nested objects (e.g. the enrollment carries the
+  // session, which carries the bond, which carries the subject), so we save in cascade.
   const saveSubject = (subject: Subject) => setSubjects((prev) => ({ ...prev, [subject.id]: subject }))
 
   const saveBond = (bond: TutoringBond) => {

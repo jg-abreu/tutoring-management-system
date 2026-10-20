@@ -21,7 +21,7 @@ export function SubjectsPage() {
       const subject = await subjectsApi.suggest(user.id, name.trim())
       saveSubject(subject)
       setName('')
-      return `Matéria "${subject.name}" sugerida. Agora um admin precisa aprovar.`
+      return `Subject "${subject.name}" suggested. Now an admin needs to approve it.`
     })
   }
 
@@ -31,7 +31,7 @@ export function SubjectsPage() {
         ? await subjectsApi.approve(subject.id, user.id)
         : await subjectsApi.reject(subject.id, user.id)
       saveSubject(updated)
-      return `Matéria "${updated.name}" ${approve ? 'aprovada' : 'rejeitada'}.`
+      return `Subject "${updated.name}" ${approve ? 'approved' : 'rejected'}.`
     })
 
   const list = newestFirst(subjects)
@@ -41,36 +41,36 @@ export function SubjectsPage() {
       <Feedback message={feedback} onClose={clearFeedback} />
 
       <form className="card form" onSubmit={handleSuggest}>
-        <h2>Sugerir matéria</h2>
+        <h2>Suggest a subject</h2>
         <label className="field field-wide">
-          <span>Nome da matéria</span>
-          {/* maxLength igual ao @Size(max = 255) do SuggestSubjectRequest */}
+          <span>Subject name</span>
+          {/* maxLength matches @Size(max = 255) in SuggestSubjectRequest */}
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Ex.: Álgebra Linear"
+            placeholder="e.g. Linear Algebra"
             maxLength={255}
             required
           />
         </label>
         <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={busy}>
-            Sugerir como {user.label}
+            Suggest as {user.label}
           </button>
         </div>
       </form>
 
-      <h2>Matérias ({list.length})</h2>
+      <h2>Subjects ({list.length})</h2>
       {list.length === 0 ? (
-        <p className="muted">Nenhuma matéria sugerida por esta tela ainda.</p>
+        <p className="muted">No subjects suggested from this screen yet.</p>
       ) : (
         list.map((subject) => (
           <article key={subject.id} className="card row-card">
             <div className="row-main">
               <h3>{subject.name}</h3>
               <p className="muted">
-                sugerida por {userLabel(subject.creator.id)}
-                {subject.evaluator && ` · avaliada por ${userLabel(subject.evaluator.id)}`} ·{' '}
+                suggested by {userLabel(subject.creator.id)}
+                {subject.evaluator && ` · evaluated by ${userLabel(subject.evaluator.id)}`} ·{' '}
                 <span className="mono" title={subject.id}>
                   {shortId(subject.id)}
                 </span>
@@ -80,10 +80,10 @@ export function SubjectsPage() {
             {subject.status === 'PENDING' && (
               <div className="row-actions">
                 <button type="button" className="btn btn-small btn-primary" disabled={busy} onClick={() => decide(subject, true)}>
-                  Aprovar
+                  Approve
                 </button>
                 <button type="button" className="btn btn-small btn-danger" disabled={busy} onClick={() => decide(subject, false)}>
-                  Rejeitar
+                  Reject
                 </button>
               </div>
             )}
