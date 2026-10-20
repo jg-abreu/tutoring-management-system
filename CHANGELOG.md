@@ -14,9 +14,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 - The whole project (docs, UI text, comments and sample data) is now in English.
-- README rewritten; the step-by-step walkthrough moved to [`docs/USAGE.md`](docs/USAGE.md).
+- README rewritten; the step-by-step walkthrough moved to [`docs/USAGE.md`](docs/USAGE.md). It now opens with a screenshot of a full session using the waitlist.
 
 ### Fixed
+- Actions in the Docker frontend failed with `403 Invalid CORS request`: nginx now forwards the original `Host` header with its port, so requests through the `/api` proxy are same-origin.
 - Maven wrapper (`mvnw`) is now executable on Linux and macOS.
 - `http/subject.http` used `PUT` for rejecting a subject; the endpoint is `PATCH`.
 

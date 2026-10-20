@@ -9,6 +9,10 @@
 
 A full-stack system for running academic tutoring programs: admins approve who can tutor which subject, tutors open sessions with limited spots, and students enroll — with an automatic waitlist that promotes the next student when a spot opens up.
 
+<p align="center">
+  <img src="docs/images/session-waitlist.png" alt="A Calculus I session with capacity 2: two students confirmed and a third on the waitlist at position 1" width="720">
+</p>
+
 Built as a portfolio project with a focus on **domain modeling**, **business rules enforced as state machines** and **context-based authorization**, backed by a Spring Boot REST API, a PostgreSQL schema designed up front and a React frontend.
 
 ## Contents
