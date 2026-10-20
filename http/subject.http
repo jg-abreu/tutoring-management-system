@@ -10,7 +10,7 @@ Content-Type: application/json
 
 ###
 
-PUT http://localhost:8080/subjects/7b0b5704-d85b-43a2-840c-a10a9464bdae/reject
+PATCH http://localhost:8080/subjects/7b0b5704-d85b-43a2-840c-a10a9464bdae/reject
 Content-Type: application/json
 
 {

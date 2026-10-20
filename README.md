@@ -1,28 +1,56 @@
-# Academic Tutoring Management System
+# Tutoring Management System
 
-A system for managing study groups and academic tutoring sessions, with admin-approved tutoring bonds, sessions with limited spots and a waitlist, and automatic cascading cancellation when a bond is revoked. REST API in Spring Boot + web interface in React.
+[![CI](https://github.com/jg-abreu/tutoring-management-system/actions/workflows/ci.yml/badge.svg)](https://github.com/jg-abreu/tutoring-management-system/actions/workflows/ci.yml)
+![Java 21](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)
+![Spring Boot 4.1](https://img.shields.io/badge/Spring_Boot-4.1-6DB33F?logo=springboot&logoColor=white)
+![PostgreSQL 17](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white)
+![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Personal portfolio project, built with a focus on real domain modeling, business rules driven by state machines, and context-based authorization (rather than fixed user roles).
+A full-stack system for running academic tutoring programs: admins approve who can tutor which subject, tutors open sessions with limited spots, and students enroll — with an automatic waitlist that promotes the next student when a spot opens up.
 
-## Stack
+Built as a portfolio project with a focus on **domain modeling**, **business rules enforced as state machines** and **context-based authorization**, backed by a Spring Boot REST API, a PostgreSQL schema designed up front and a React frontend.
 
-**Backend**
-- Java 21
-- Spring Boot (Web, Data JPA, Validation)
-- Hibernate / JPA
-- PostgreSQL
-- Lombok
-- JUnit 5 + Mockito
+## Contents
 
-**Frontend** (in the [`frontend`](./frontend) folder)
-- React 19 + TypeScript
-- Vite
+- [Why this project](#why-this-project)
+- [Features](#features)
+- [Tech stack](#tech-stack)
+- [Quick start (Docker)](#quick-start-docker)
+- [Domain model](#domain-model)
+- [Design decisions](#design-decisions)
+- [API](#api)
+- [Testing](#testing)
+- [Local development](#local-development)
+- [Project structure](#project-structure)
+- [Roadmap](#roadmap)
 
-## Running
+## Why this project
 
-### Running with Docker (recommended for trying it out)
+Study groups and tutoring programs at universities are usually run through spreadsheets and group chats: there is no real control over who is allowed to tutor a subject, how many students fit in a session, or what happens to enrolled students when a tutor drops out. This system turns that informal process into explicit, enforced rules.
 
-All you need is [Docker Desktop](https://www.docker.com/products/docker-desktop/). Compose starts PostgreSQL (already loaded with the schema and sample data), the API and the frontend:
+## Features
+
+- **Approval workflows** — anyone can suggest a subject or ask to tutor one; an admin approves or rejects each request.
+- **Capacity and waitlist** — sessions have a fixed number of spots; once full, students join an optional waitlist with a queue position.
+- **Automatic promotion** — when a confirmed student cancels, the first waitlisted student is promoted, the queue is renumbered without gaps and the promoted student is notified, all in a single transaction.
+- **Revocation cascade** — revoking a tutor's bond cancels all of their future sessions.
+- **Context-based permissions** — there is no fixed "tutor" role; what a user can do depends on their relationship to the record (for example, only the admin who approved a bond can cancel its sessions).
+- **Predictable errors** — domain exceptions map to `400`, `403`, `404` and `409`, and unexpected errors return a generic `500` without leaking internals.
+
+## Tech stack
+
+| Layer | Technologies |
+|---|---|
+| Backend | Java 21, Spring Boot 4.1 (Web MVC, Data JPA, Validation), Hibernate, Lombok |
+| Database | PostgreSQL 17 (UUID keys, native enums, partial unique index, check constraints) |
+| Frontend | React 19, TypeScript, Vite, oxlint — no UI or state libraries |
+| Testing | JUnit 5, Mockito |
+| Infrastructure | Docker Compose, nginx, GitHub Actions |
+
+## Quick start (Docker)
+
+The only requirement is [Docker](https://www.docker.com/products/docker-desktop/).
 
 ```bash
 git clone https://github.com/jg-abreu/tutoring-management-system.git
@@ -30,19 +58,17 @@ cd tutoring-management-system
 docker compose up --build
 ```
 
-The first startup takes a few minutes (pulling images and building). After that:
+Then open **http://localhost:3000**. Compose starts PostgreSQL with the schema and sample data, the API and the frontend:
 
-| What | Address | How to access it |
+| Service | Address | Notes |
 |---|---|---|
-| Frontend | http://localhost:3000 | in the browser (this is where you test it) |
-| API | http://localhost:8080 | through an HTTP client (the [`http/`](./http) files, Postman, curl). The API has no `GET` endpoints yet, so opening it in the browser shows a 404, and that's expected |
-| PostgreSQL | `localhost:5433`, database/user/password `tutoring` | through a database client (pgAdmin, DBeaver, IntelliJ); it doesn't open in the browser |
+| Frontend | http://localhost:3000 | main entry point |
+| API | http://localhost:8080 | use an HTTP client; there are no `GET` endpoints yet, so the browser shows a 404 |
+| PostgreSQL | `localhost:5433` | database, user and password: `tutoring` |
 
-The data lives in a Docker volume and survives `docker compose down`. To go back to the initial state (schema + seed again): `docker compose down -v` and then `docker compose up`.
+There is no login yet, so the frontend has an **"Acting as"** switcher to choose who performs each action. The sample data includes an admin, a tutor with an approved bond for *Calculus I*, and three students:
 
-**Test users.** There is no login yet: the frontend has an **"Acting as"** switcher, and the API receives the user's UUID in the request body. The seed ([`docker/postgres/init/02-seed.sql`](./docker/postgres/init/02-seed.sql)) creates:
-
-| In the switcher | Email | Role | UUID |
+| User | Email | Role | UUID |
 |---|---|---|---|
 | admin | `admin@tutoring.dev` | Admin | `2c53ba13-53cc-4c79-a4f2-31cfbcceb898` |
 | jgabreuteste | `tutor@tutoring.dev` | Calculus I tutor | `899b90d5-673e-4137-abd2-1606d73f9b0e` |
@@ -50,212 +76,191 @@ The data lives in a Docker volume and survives `docker compose down`. To go back
 | student2 | `student2@tutoring.dev` | Student | `fb0e9fd2-7181-495c-922b-dd4c7e5baf2c` |
 | student3 | `student3@tutoring.dev` | Student | `b5578fc3-17cd-4277-aec8-407227991e1f` |
 
-The approved subjects **Calculus I** (`a4ce163a-0660-4262-9b5c-15f457fba955`) and **Algorithms and Data Structures** (`ef56bc00-2be6-4a12-af88-9f809de94ba5`) also already exist, along with the tutor's **approved** bond for Calculus I (`0128d64d-7818-4eec-9b8e-a55e8421ab1f`, evaluated by the admin). That lets you jump straight to step 4 of the [step-by-step guide](#how-to-use-step-by-step): create a session with few spots and a waitlist, and enroll the three students.
+To see the waitlist in action, act as the tutor, create a session with 1 spot and the waitlist enabled, then enroll the three students and cancel the first one. The [usage guide](docs/USAGE.md) walks through every flow step by step.
 
-### Backend
+Data persists across `docker compose down`; use `docker compose down -v` to reset to the sample data.
 
-Prerequisites: Java 21 and a PostgreSQL database with the schema from [`docs/database_schema_reference.md`](./docs/database_schema_reference.md) (Hibernate runs with `ddl-auto=validate` and doesn't create tables).
+## Domain model
 
-Set the connection environment variables:
+```mermaid
+erDiagram
+    USERS ||--o{ SUBJECT : "creates / evaluates"
+    USERS ||--o{ TUTORING_BOND : "requests / evaluates"
+    SUBJECT ||--o{ TUTORING_BOND : has
+    TUTORING_BOND ||--o{ SESSION : originates
+    SESSION ||--o{ ENROLLMENT : receives
+    USERS ||--o{ ENROLLMENT : makes
+    USERS ||--o{ NOTIFICATION : receives
 
-| Variable | Example |
-|---|---|
-| `DB_HOST` | `ep-xxxx.us-east-2.aws.neon.tech` |
-| `DB_NAME` | `neondb` |
-| `DB_USERNAME` | database user |
-| `DB_PASSWORD` | database password |
-
-```bash
-./mvnw spring-boot:run   # starts the API at http://localhost:8080
-./mvnw test              # runs the unit tests
+    USERS {
+        uuid id PK
+        varchar email UK
+        varchar password_hash
+        boolean active
+    }
+    SUBJECT {
+        uuid id PK
+        varchar name UK
+        subject_status status
+        uuid creator_id FK
+        uuid evaluator_id FK
+    }
+    TUTORING_BOND {
+        uuid id PK
+        bond_status status
+        uuid requester_id FK
+        uuid evaluator_id FK
+        uuid subject_id FK
+    }
+    SESSION {
+        uuid id PK
+        timestamptz start_time
+        timestamptz end_time
+        int spots
+        boolean allows_waitlist
+        session_status status
+        uuid bond_id FK
+    }
+    ENROLLMENT {
+        uuid id PK
+        enrollment_status status
+        int queue_position
+        uuid session_id FK
+        uuid student_id FK
+    }
+    NOTIFICATION {
+        uuid id PK
+        notification_event_type event_type
+        text message
+        uuid receiver_id FK
+    }
 ```
 
-### Frontend
+Every status change goes through a service method that checks the current state first, so invalid transitions return `409 Conflict`:
 
-With the API running:
+```mermaid
+stateDiagram-v2
+    direction LR
+    state "Tutoring bond" as bond {
+        [*] --> PENDING : requested
+        PENDING --> APPROVED : admin approves
+        PENDING --> REJECTED : admin rejects
+        APPROVED --> REVOKED : admin revokes (cancels future sessions)
+    }
+```
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    state "Enrollment" as enrollment {
+        [*] --> CONFIRMED : spot available
+        [*] --> WAITLISTED : session full, waitlist on
+        WAITLISTED --> CONFIRMED : promoted when a spot opens
+        CONFIRMED --> CANCELLED : student cancels
+        WAITLISTED --> CANCELLED : student cancels
+    }
+```
+
+The schema was designed and documented before any Java code — see the [schema notes](docs/database_schema_reference.md), the full [SQL schema](docker/postgres/init/01-schema.sql) and the original [design diagrams](docs/diagrams) (ER, class and the 8 business flows).
+
+## Design decisions
+
+- **Roles are derived, not stored.** A user is a tutor *of a subject* if they hold an approved bond for it. The same person can tutor one subject and be a student in another.
+- **Sessions belong to the bond, not the user.** This makes the revocation cascade a single query on `bond_id` instead of cross-referencing users and subjects.
+- **Nothing is physically deleted.** Cancelling, rejecting and revoking are status changes, so history is preserved.
+- **The database enforces what it can.** UUID keys, native enums, `CHECK` constraints (`spots >= 1`, `end_time > start_time`) and a partial unique index that blocks two live bonds for the same tutor and subject.
+- **Business logic lives in the services.** Enrollment status has no database default because confirming or waitlisting depends on counting taken spots; the service decides inside a transaction.
+- **Known trade-off:** the acting user's UUID is sent in the request body until authentication lands in v2.0.
+
+## API
+
+| Method | Route | Action | Allowed for |
+|---|---|---|---|
+| `POST` | `/subjects` | Suggest a subject | any user |
+| `PATCH` | `/subjects/{id}/approve` · `/reject` | Approve or reject a subject | admin\* |
+| `POST` | `/tutoring-bonds` | Request a tutoring bond | any user, on an approved subject |
+| `PATCH` | `/tutoring-bonds/{id}/approve` · `/reject` · `/revoke` | Evaluate or revoke a bond | admin\* |
+| `POST` | `/sessions` | Create a session | the bond's requester or evaluator |
+| `PATCH` | `/sessions/{id}/cancel` | Cancel a session | the bond's evaluator |
+| `POST` | `/sessions/{id}/enrollments` | Enroll in a session | any user, on an active session |
+| `PATCH` | `/enrollments/{id}/cancel` | Cancel an enrollment | the enrolled student |
+
+\* User roles arrive in v2.0; for now these endpoints accept any existing user.
+
+Responses use **201** on create, **200** on update, **400** for invalid input, **403** when the user isn't allowed, **404** for missing records and **409** for conflicts with the current state. Runnable request collections live in [`http/`](http).
+
+## Testing
+
+```bash
+./mvnw test
+```
+
+The suite has **61 tests**: unit tests for every service (JUnit 5 + Mockito, named `should...When...`) covering success paths, permission checks and invalid transitions, plus a Spring context test that validates the JPA mappings against the real schema. Tests were written right after each service rather than at the end.
+
+[GitHub Actions](.github/workflows/ci.yml) runs the backend suite against a PostgreSQL service and lints and builds the frontend on every push and pull request.
+
+## Local development
+
+**Backend** — requires Java 21 and a PostgreSQL database with [the schema](docker/postgres/init/01-schema.sql) (Hibernate runs with `ddl-auto=validate` and doesn't create tables). Set the connection through environment variables and start the API:
+
+```bash
+export DB_HOST=localhost:5432 DB_NAME=tutoring DB_USERNAME=... DB_PASSWORD=...
+./mvnw spring-boot:run        # http://localhost:8080
+```
+
+The default configuration connects over SSL, as used with [Neon](https://neon.com) in day-to-day development; for a local database without SSL, set `SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/tutoring` instead.
+
+**Frontend** — requires Node.js 20+ and the API running:
 
 ```bash
 cd frontend
 npm install
-npm run dev              # opens at http://localhost:5173
+npm run dev                   # http://localhost:5173
 ```
 
-More details in the [frontend README](./frontend/README.md).
+See the [frontend README](frontend/README.md) for its structure and commands.
 
-## How to use (step by step)
+## Project structure
 
-The full system flow, from scratch to a session with a waitlist, done through the frontend at `http://localhost:5173`.
-
-### 0. Prepare the users (first time only, on a fresh database)
-
-> If you're running with Docker, skip this step: the users already come from the seed and the frontend is at `http://localhost:3000`.
-
-There is no sign-up or login yet (planned for v2.0), so users are inserted directly into the database. Run this on your PostgreSQL:
-
-```sql
-INSERT INTO users (id, email, password_hash)
-VALUES
-    (gen_random_uuid(), 'tutor@test.com',    'no-login-in-v1'),
-    (gen_random_uuid(), 'admin@test.com',    'no-login-in-v1'),
-    (gen_random_uuid(), 'student1@test.com', 'no-login-in-v1'),
-    (gen_random_uuid(), 'student2@test.com', 'no-login-in-v1'),
-    (gen_random_uuid(), 'student3@test.com', 'no-login-in-v1')
-RETURNING id, email;
+```
+├── src/main/java/.../tutoringmanagementsystem
+│   ├── controller/      REST endpoints
+│   ├── service/         business rules and state transitions
+│   ├── model/           JPA entities and status enums
+│   ├── repository/      Spring Data repositories (derived queries)
+│   ├── dto/             validated request bodies
+│   ├── exception/       domain exceptions + GlobalExceptionHandler
+│   └── config/          CORS
+├── src/test/            service unit tests
+├── frontend/            React + TypeScript client
+├── docker/postgres/     schema and seed loaded by Docker Compose
+├── docs/                schema notes, usage guide, design diagrams
+└── http/                IntelliJ HTTP Client request collections
 ```
 
-Copy the returned UUIDs into the `TEST_USERS` list in [`frontend/src/config/testData.ts`](./frontend/src/config/testData.ts). In that same file, empty `KNOWN_SUBJECTS` and `KNOWN_BONDS`: they point to records in the author's development database.
+## Roadmap
 
-### 1. Choose who is acting
+- [x] **v1.0** — domain model, all business flows, error handling and unit tests
+- [x] **v1.1** — React frontend, input validation and error handling fixes
+- [x] Docker Compose setup and CI
+- [ ] **v2.0**
+  - Authentication, with the acting user taken from the token instead of the request body
+  - User roles, so admin-only actions are actually restricted
+  - `GET` endpoints for subjects, bonds, sessions and enrollments
+  - Response DTOs instead of serialized JPA entities
+  - Cancelling a session or revoking a bond also cancels its enrollments and notifies the students
+  - Prevent tutors from enrolling in their own sessions
+  - Normalize subject names (case and accents) before the duplicate check
+  - Database locking so two students can't take the last spot at the same time
 
-At the top of the screen, the **"Acting as"** switcher sets which user performs each action (it stands in for the login). Switch users whenever a step asks you to.
+See the [changelog](CHANGELOG.md) for what changed in each release.
 
-### 2. Create a subject ("1. Subjects" tab)
+## License
 
-1. As **any user**, suggest a subject (e.g. "Linear Algebra"). It starts as **Pending**.
-2. Switch to the **admin** and click **Approve**. Only approved subjects accept tutors.
+Released under the [MIT License](LICENSE).
 
-### 3. Make someone a tutor ("2. Tutoring bonds" tab)
+## Author
 
-1. As the **future tutor**, pick the approved subject and click **Request**. The bond starts as **Pending**.
-2. As the **admin**, click **Approve**. From then on, that user is a tutor for *that* subject, and the admin who approved it becomes the bond's **evaluator**.
+**João Abreu** — back-end developer and Computer Science student in Rio de Janeiro, Brazil.
 
-The tutor role is per subject: the same user can be a tutor in one subject and a student in another.
-
-### 4. Create a session ("3. Sessions" tab)
-
-1. As the **tutor** (or the bond's evaluator), pick the approved bond.
-2. Set the start, end and capacity, and check **"Allow waitlist"** if you want a queue once it fills up.
-
-### 5. Enroll students
-
-1. Switch to a **student** and click **Enroll** on the session card. With a free spot, the enrollment is **Confirmed**.
-2. Once the session is full, the next students go onto the **waitlist**, with their position in the queue (#1, #2...). Without a waitlist, the API rejects the enrollment.
-
-### 6. Cancel an enrollment
-
-As **the student themselves**, click **Cancel** on their enrollment. If they were confirmed, the first person in the queue is **promoted** automatically, the queue is renumbered and the promoted student gets a notification.
-
-### 7. Cancel the session or revoke the bond
-
-- **Cancel session:** only the bond's **evaluator** (the admin who approved it).
-- **Revoke bond** (tab 2, as admin): the tutor loses the bond and **all of their future sessions** are cancelled in cascade.
-
-### Who can do what
-
-| Action | Who |
-|---|---|
-| Suggest a subject | any user |
-| Approve/reject subject and bond, revoke bond | admin (in v1 there are no roles yet: the API accepts any existing user) |
-| Request a tutoring bond | any user, on an approved subject |
-| Create a session | the tutor (requester) or the evaluator of the approved bond |
-| Cancel a session | only the bond's evaluator |
-| Enroll | any user, in an active session |
-| Cancel an enrollment | only the student themselves |
-
-### v1 limitations you'll notice
-
-- The API has no `GET` endpoints yet, so the lists show **only what the screen itself created** (stored in the browser). Changes the server makes to other records, such as waitlist promotion and the revocation cascade, don't show up on screen, even though they happen in the database.
-- The **"Clear local data"** button, in the yellow notice, wipes those lists from the browser. It doesn't delete anything from the database.
-
-**Without the frontend:** the [`http/session.http`](./http/session.http) file runs the same sessions and enrollments flow directly against the API, using IntelliJ's HTTP Client.
-
-## Endpoints
-
-| Method | Route | Action |
-|---|---|---|
-| `POST` | `/subjects` | suggest a subject |
-| `PATCH` | `/subjects/{id}/approve` · `/reject` | approve / reject a subject |
-| `POST` | `/tutoring-bonds` | request a tutoring bond |
-| `PATCH` | `/tutoring-bonds/{id}/approve` · `/reject` · `/revoke` | approve / reject / revoke a bond |
-| `POST` | `/sessions` | create a session |
-| `PATCH` | `/sessions/{id}/cancel` | cancel a session |
-| `POST` | `/sessions/{id}/enrollments` | enroll |
-| `PATCH` | `/enrollments/{id}/cancel` | cancel an enrollment |
-
-Response codes: **201** on create, **200** on update, **400** invalid request, **403** not allowed, **404** not found, **409** conflict with the current state. Unexpected errors return a generic 500, with no internal details. Runnable examples in [`http/`](./http).
-
-## The problem
-
-Study groups and academic tutoring are usually organized informally (spreadsheets, WhatsApp groups), with no real control over spots, approval of who can tutor which subject, or a history of who took part in what. This system formalizes that flow:
-
-- Any user can propose a new subject, subject to an administrator's approval
-- Users become tutors for a specific subject through a tutoring bond (approved by an admin)
-- Tutors create sessions with limited spots; students enroll, with an optional waitlist and automatic promotion when a spot opens up
-- Roles are dynamic: the same user can be a tutor in one subject and a student in another
-
-## Design decisions
-
-- **Dynamic roles**: there is no fixed "role" field on the user — the tutor role is inferred from the existence of an approved tutoring bond for that specific subject
-- **Sessions reference the tutoring bond, not the user directly**, which makes the revocation cascade structurally simple: revoking a bond automatically cancels all future sessions tied to it
-- **No physical deletion of data** — every destructive action (deactivating a user, revoking a bond, cancelling a session) is reversible by nature, preserving history
-- **UUID primary keys** and **statuses as native PostgreSQL ENUMs**, favoring robustness over simplicity
-- **userUuid received explicitly in the request body for now** (technical debt): ideally it would be extracted from an authentication token; this will be changed once security is implemented
-
-## Domain diagrams
-
-The domain was fully modeled before writing any code. Diagrams are available in [`docs/diagrams`](./docs/diagrams):
-
-- **ER diagram** — database entities and their relationships
-- **Class diagram** — application classes (entities + services) with attributes and methods
-- **Business flows** — step by step of the 8 main system flows (subject approval, bond approval, session creation, enrollment, cancellations, revocation, user deactivation)
-
-## Current status
-
-✅ **Version 1.1 complete** (backend + frontend), now runnable with Docker Compose. Next step: v2.0.
-
-- [x] Complete domain modeling (ER, class and business flow diagrams)
-- [x] Database schema designed and documented
-- [x] Schema implemented in PostgreSQL (Neon, cloud database)
-- [x] Spring Boot project created and configured (Maven, Java 21, Web/JPA/PostgreSQL Driver/Validation/DevTools)
-- [x] Application connected to the database (the app starts and connects successfully)
-- [x] Lombok configured
-- [x] All 6 JPA entities mapped and validated against the schema (User, Subject, TutoringBond, Session, Enrollment, Notification)
-- [x] Repositories created for every entity
-- [x] Complete Subject flow (Service + Controller + error handling) — tested via HTTP Client and merged into main
-- [x] GlobalExceptionHandler centralizing exception handling with the appropriate HTTP codes
-- [x] Complete TutoringBondService: requestTutoringBond, approveTutoringBond, rejectTutoringBond and revokeTutoringBond, with status validation and specific exceptions (TutoringBondNotFoundException, TutoringBondAlreadyExistsException, InvalidTutoringBondStatusException)
-- [x] TutoringBondService unit tests (JUnit 5 + Mockito, `@ExtendWith(MockitoExtension.class)`, test names following the `should...When...` pattern), covering success and error scenarios for approve, reject and revoke
-- [x] TutoringBond controller, with exceptions mapped in the GlobalExceptionHandler
-- [x] Session and Enrollment exceptions created and mapped to the appropriate HTTP codes (400, 403, 404, 409): SessionNotFoundException, EnrollmentNotFoundException, SessionFullException, EnrollmentAlreadyExistsException, InvalidSessionStatusException, InvalidEnrollmentStatusException, UserWithoutPermissionException, InvalidTimeException
-- [x] SessionService started: `createSession` implemented (validates that the end time is after the start before hitting the database, requires an APPROVED bond, restricted to the bond's requester or evaluator, creates the session through the entity constructor)
-- [x] `createSession` unit tests
-- [x] `cancelSession` (bond evaluator only) + tests
-- [x] Revocation cascade: revoking a bond cancels its future active sessions (`cancelFutureSessions` with a derived query, transactional `revokeTutoringBond`) + tests
-- [x] `enroll` (duplicate blocking, confirmation or waitlist, full session) + tests
-- [x] `cancelEnrollment` (only the student themselves can cancel; automatic promotion of the first waitlisted student, gap-free queue reordering and a `SPOT_PROMOTED` notification to the promoted student, all inside `@Transactional`) + tests
-- [x] Session and Enrollment controllers (`SessionController` for sessions and enrollments, `EnrollmentController` for cancelling enrollments, following shallow route nesting) + `http/session.http` covering the full flow against the real database
-- [x] Password left out of API responses (`@JsonIgnore` on `passwordHash`, as a temporary fix until response DTOs exist)
-- [x] **Version 1.0** closed with a tag and release on GitHub
-- [x] Frontend in React + TypeScript + Vite, with subject, bond and session/enrollment screens, and CORS configured on the backend
-- [x] Two rounds of end-to-end manual testing through the frontend, which revealed and motivated the fixes below
-- [x] Subject with a duplicate name → 409 (before: 500 with SQL exposed in the response)
-- [x] Generic error handling: integrity conflicts → 409, unexpected errors → generic 500 with logging, without leaking internal details
-- [x] Tutoring bond only on an approved subject → 409
-- [x] Create endpoints returning 201 Created
-- [x] Input validation on DTOs with Bean Validation (`@NotNull`, `@NotBlank`, `@Size`, `@Min` + `@Valid`) → 400
-- [x] Unit tests for `SubjectService` and `requestTutoringBond` (61 tests in total)
-- [x] **Version 1.1**: frontend + validation and error handling fixes
-- [x] Docker Compose to run the full system (PostgreSQL with schema and sample data, API and frontend) with a single `docker compose up`, tested from a clean clone
-- [ ] Security/authentication (to extract the logged-in user instead of receiving it in the request body) — v2.0
-- [ ] User roles (admin): `User` has no role today, so the "admin" actions don't check anything, and admin cancellation of enrollments was left out — v2.0
-- [ ] `GET` endpoints (list subjects, bonds, sessions and enrollments) — v2.0
-- [ ] Response DTOs instead of JPA entities (replacing the temporary `@JsonIgnore`) — v2.0
-- [ ] Cancelling a session (or revoking the bond) should also cancel its enrollments and notify the students; today they stay `CONFIRMED`/`WAITLISTED` — v2.0
-- [ ] Prevent the tutor from enrolling in their own session — v2.0
-- [ ] Normalize subject names (case and accents) before checking for duplicates — v2.0
-- [ ] Enrollment concurrency: two students competing for the last spot at the same time can both be confirmed (requires a database lock) — v2.0
-- [ ] Separate the development/test database from the "real" database — v2.0
-
-### Process conventions
-
-- **Tests right after each service**: unit tests (JUnit/Mockito) are written as soon as a service is done, before moving on to the next one — they don't pile up until the end of the project
-- **Docker for testers**: Docker Compose was brought forward (before authentication) so recruiters and devs can run the system without setting up a database; day-to-day development still happens on Neon
-
-## Infrastructure stack
-
-- **Database:** PostgreSQL hosted on [Neon](https://neon.com) (free tier), chosen so it doesn't depend on a specific machine
-- **Connection configuration:** through environment variables (host, database name, user, password), never committed to the repository
-- **Lombok:** used to cut down boilerplate (getters, setters, constructors) in entities and services
-- **HTTP Client (IntelliJ Ultimate):** used to test the REST endpoints, with `.http` files versioned in the `http/` folder
-- **Node.js + Vite:** frontend development environment
-- **Docker Compose:** PostgreSQL 17 with schema and seed loaded on first startup (`docker/postgres/init/`), API in a two-stage image (Maven → JRE 21) and frontend served by nginx, which forwards `/api` to the API (same origin, no CORS)
+[GitHub](https://github.com/jg-abreu) · [LinkedIn](https://www.linkedin.com/in/jo%C3%A3o-abreuuu) · jgabreudev@gmail.com
