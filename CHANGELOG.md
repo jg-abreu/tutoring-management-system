@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - README rewritten; the step-by-step walkthrough moved to [`docs/USAGE.md`](docs/USAGE.md).
 
 ### Fixed
+- Actions in the Docker frontend failed with `403 Invalid CORS request`: nginx now forwards the original `Host` header with its port, so requests through the `/api` proxy are same-origin.
 - Maven wrapper (`mvnw`) is now executable on Linux and macOS.
 - `http/subject.http` used `PUT` for rejecting a subject; the endpoint is `PATCH`.
 
