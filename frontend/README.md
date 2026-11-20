@@ -5,6 +5,8 @@
 ![TypeScript 6](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
 ![Vite 8](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
 
+**Live demo: [tutoring.joaoabreu.dev](https://tutoring.joaoabreu.dev)** — pick any sample user on the login screen (password `senha123`). The data resets to the sample set every day at 06:00 UTC.
+
 Web client for the [Tutoring Management API](https://github.com/jg-abreu/tutoring-management-api). It covers the whole flow in the browser: suggesting and approving subjects, requesting and evaluating tutoring bonds, creating and cancelling sessions, enrolling students and cancelling enrollments (with a waitlist).
 
 <p align="center">
@@ -58,6 +60,16 @@ docker compose up --build
 ```
 
 Open `http://localhost:3000`. nginx serves the build and forwards `/api/` to the API, so the browser sees a single origin. The API address comes from the `API_URL` environment variable (default `http://host.docker.internal:8080`, the API on your machine); if another program uses port 8080 on your machine, point it elsewhere, for example `API_URL=http://other-host:8080 docker compose up --build`.
+
+### Production build
+
+The live demo serves a static build from the same origin as the API, which nginx exposes under `/api`:
+
+```bash
+VITE_API_URL=/api npm run build
+```
+
+In Git Bash, prefix it with `MSYS_NO_PATHCONV=1`, otherwise `/api` is rewritten into a Windows path. How the demo is hosted and deployed is in the API repository's [`deploy/README.md`](https://github.com/jg-abreu/tutoring-management-api/blob/main/deploy/README.md).
 
 ### Logging in
 
