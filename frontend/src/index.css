@@ -598,22 +598,6 @@ input[type='datetime-local'] {
   gap: 1.5rem;
 }
 
-.local-note {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 1rem;
-  max-width: 62ch;
-  padding-left: 0.9rem;
-  border-left: 3px solid var(--wait);
-  color: var(--fg-muted);
-  font-size: 0.88rem;
-}
-
-.local-note > span {
-  flex: 1 1 20rem;
-}
-
 @media (max-width: 720px) {
   .app-body {
     grid-template-columns: minmax(0, 1fr);
