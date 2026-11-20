@@ -23,3 +23,7 @@ export function formatRange(start: string, end: string): string {
 export function shortId(id: string): string {
   return id.slice(0, 8)
 }
+
+export function initials(label: string): string {
+  return label.replace(/[^a-zA-Z0-9]/g, '').slice(0, 2).toUpperCase()
+}
