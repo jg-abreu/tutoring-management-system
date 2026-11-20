@@ -34,7 +34,7 @@ export function BondsPage() {
   function handleRequest(e: FormEvent) {
     e.preventDefault()
     run(async () => {
-      const bond = await bondsApi.request(subjectUuid.trim(), user.id)
+      const bond = await bondsApi.request(subjectUuid.trim())
       saveBond(bond)
       return `Tutoring bond for ${user.label} in "${bond.subject.name}" requested. Now an admin needs to approve it.`
     })
@@ -42,7 +42,7 @@ export function BondsPage() {
 
   const decide = (bond: TutoringBond, decision: Decision) =>
     run(async () => {
-      const updated = await bondsApi[decision](bond.id, user.id)
+      const updated = await bondsApi[decision](bond.id)
       saveBond(updated)
       return `Tutoring bond ${DECISION_TEXT[decision]}.`
     })

@@ -11,14 +11,13 @@ function tomorrowAt(hour: number): string {
 }
 
 type Props = {
-  userUuid: string
   userLabel: string
   bondOptions: UuidOption[]
   busy: boolean
   onSubmit: (input: CreateSessionInput) => void
 }
 
-export function CreateSessionForm({ userUuid, userLabel, bondOptions, busy, onSubmit }: Props) {
+export function CreateSessionForm({ userLabel, bondOptions, busy, onSubmit }: Props) {
   const [bondUuid, setBondUuid] = useState(bondOptions[0]?.id ?? '')
   const [start, setStart] = useState(tomorrowAt(14))
   const [end, setEnd] = useState(tomorrowAt(16))
@@ -29,7 +28,6 @@ export function CreateSessionForm({ userUuid, userLabel, bondOptions, busy, onSu
     e.preventDefault()
     onSubmit({
       tutoringBondUuid: bondUuid.trim(),
-      userUuid,
       startTime: toOffsetDateTime(start),
       endTime: toOffsetDateTime(end),
       spots,

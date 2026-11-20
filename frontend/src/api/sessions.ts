@@ -3,7 +3,6 @@ import type { Enrollment, Session } from './types'
 
 export type CreateSessionInput = {
   tutoringBondUuid: string
-  userUuid: string
   startTime: string
   endTime: string
   spots: number
@@ -13,12 +12,9 @@ export type CreateSessionInput = {
 export const sessionsApi = {
   create: (input: CreateSessionInput) => api.post<Session>('/sessions', input),
 
-  cancel: (sessionUuid: string, userUuid: string) =>
-    api.patch<Session>(`/sessions/${sessionUuid}/cancel`, { userUuid }),
+  cancel: (sessionUuid: string) => api.patch<Session>(`/sessions/${sessionUuid}/cancel`),
 
-  enroll: (sessionUuid: string, userUuid: string) =>
-    api.post<Enrollment>(`/sessions/${sessionUuid}/enrollments`, { userUuid }),
+  enroll: (sessionUuid: string) => api.post<Enrollment>(`/sessions/${sessionUuid}/enrollments`),
 
-  cancelEnrollment: (enrollmentUuid: string, userUuid: string) =>
-    api.patch<Enrollment>(`/enrollments/${enrollmentUuid}/cancel`, { userUuid }),
+  cancelEnrollment: (enrollmentUuid: string) => api.patch<Enrollment>(`/enrollments/${enrollmentUuid}/cancel`),
 }

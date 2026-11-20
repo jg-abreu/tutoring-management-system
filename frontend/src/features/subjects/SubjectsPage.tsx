@@ -18,7 +18,7 @@ export function SubjectsPage() {
   function handleSuggest(e: FormEvent) {
     e.preventDefault()
     run(async () => {
-      const subject = await subjectsApi.suggest(user.id, name.trim())
+      const subject = await subjectsApi.suggest(name.trim())
       saveSubject(subject)
       setName('')
       return `Subject "${subject.name}" suggested. Now an admin needs to approve it.`
@@ -28,8 +28,8 @@ export function SubjectsPage() {
   const decide = (subject: Subject, approve: boolean) =>
     run(async () => {
       const updated = approve
-        ? await subjectsApi.approve(subject.id, user.id)
-        : await subjectsApi.reject(subject.id, user.id)
+        ? await subjectsApi.approve(subject.id)
+        : await subjectsApi.reject(subject.id)
       saveSubject(updated)
       return `Subject "${updated.name}" ${approve ? 'approved' : 'rejected'}.`
     })
