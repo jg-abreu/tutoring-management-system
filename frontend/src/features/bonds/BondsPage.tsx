@@ -68,44 +68,51 @@ export function BondsPage() {
         </div>
       </form>
 
-      <h2>Tutoring bonds ({list.length})</h2>
-      {list.length === 0 ? (
-        <p className="muted">No tutoring bonds requested or evaluated from this screen yet.</p>
-      ) : (
-        list.map((bond) => (
-          <article key={bond.id} className="card row-card">
-            <div className="row-main">
-              <h3>
-                {userLabel(bond.requester.id)} · {bond.subject.name}
-              </h3>
-              <p className="muted">
-                {bond.evaluator ? `evaluated by ${userLabel(bond.evaluator.id)} · ` : ''}
-                <span className="mono" title={bond.id}>
-                  {shortId(bond.id)}
-                </span>
-              </p>
-            </div>
-            <StatusBadge status={bond.status} />
-            <div className="row-actions">
-              {bond.status === 'PENDING' && (
-                <>
-                  <button type="button" className="btn btn-small btn-primary" disabled={busy} onClick={() => decide(bond, 'approve')}>
-                    Approve
-                  </button>
-                  <button type="button" className="btn btn-small btn-danger" disabled={busy} onClick={() => decide(bond, 'reject')}>
-                    Reject
-                  </button>
-                </>
-              )}
-              {bond.status === 'APPROVED' && (
-                <button type="button" className="btn btn-small btn-danger" disabled={busy} onClick={() => decide(bond, 'revoke')}>
-                  Revoke
-                </button>
-              )}
-            </div>
-          </article>
-        ))
-      )}
+      <section aria-labelledby="bond-list">
+        <h2 id="bond-list" className="visually-hidden">
+          Tutoring bond list
+        </h2>
+        {list.length === 0 ? (
+          <p className="empty muted">No tutoring bonds yet. Request one above for an approved subject.</p>
+        ) : (
+          <ul className="item-list">
+            {list.map((bond) => (
+              <li key={bond.id} className="item">
+                <div className="item-main">
+                  <h3>{bond.subject.name}</h3>
+                  <p className="item-meta muted">
+                    <span>Tutor {userLabel(bond.requester.id)}</span>
+                    {bond.evaluator && <span>Evaluated by {userLabel(bond.evaluator.id)}</span>}
+                    <span className="mono" title={bond.id}>
+                      {shortId(bond.id)}
+                    </span>
+                  </p>
+                </div>
+                <StatusBadge status={bond.status} />
+                {(bond.status === 'PENDING' || bond.status === 'APPROVED') && (
+                  <div className="item-actions">
+                    {bond.status === 'PENDING' && (
+                      <>
+                        <button type="button" className="btn btn-small btn-primary" disabled={busy} onClick={() => decide(bond, 'approve')}>
+                          Approve
+                        </button>
+                        <button type="button" className="btn btn-small btn-danger" disabled={busy} onClick={() => decide(bond, 'reject')}>
+                          Reject
+                        </button>
+                      </>
+                    )}
+                    {bond.status === 'APPROVED' && (
+                      <button type="button" className="btn btn-small btn-danger" disabled={busy} onClick={() => decide(bond, 'revoke')}>
+                        Revoke
+                      </button>
+                    )}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   )
 }
