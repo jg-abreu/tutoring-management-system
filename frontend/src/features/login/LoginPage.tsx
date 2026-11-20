@@ -4,7 +4,7 @@ import { AppHeader } from '../../components/AppHeader'
 import { Feedback, type FeedbackMessage } from '../../components/Feedback'
 import { SAMPLE_PASSWORD, TEST_USERS } from '../../config/testData'
 import { useSession } from '../../context/currentUserContext'
-import { initials } from '../../lib/format'
+import { displayName, initials } from '../../lib/format'
 
 export function LoginPage() {
   const { login, sessionExpired } = useSession()
@@ -81,10 +81,10 @@ export function LoginPage() {
                   onClick={() => fillIn(u.email)}
                 >
                   <span className="avatar" aria-hidden="true">
-                    {initials(u.label)}
+                    {initials(displayName(u.email))}
                   </span>
                   <span className="sample-user-text">
-                    <strong>{u.label}</strong>
+                    <strong>{displayName(u.email)}</strong>
                     <span className="muted">{u.email}</span>
                   </span>
                   <span className="role-tag">{u.role === 'Admin' ? 'Admin' : `User, ${u.role.toLowerCase()}`}</span>

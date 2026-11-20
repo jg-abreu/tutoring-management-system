@@ -1,5 +1,7 @@
 import { Sidebar } from './components/Sidebar'
 import { AppHeader } from './components/AppHeader'
+import { AppDataProvider } from './context/AppData'
+import { useAppData } from './context/appDataContext'
 import { CurrentUserProvider } from './context/CurrentUser'
 import { useCurrentUser, useSession } from './context/currentUserContext'
 import { KnownDataProvider } from './context/KnownData'
@@ -19,16 +21,26 @@ const SECTIONS = [
 type SectionId = (typeof SECTIONS)[number]['id']
 
 function Shell() {
+  const { user } = useCurrentUser()
+  return (
+    <AppDataProvider key={user.id}>
+      <ShellContent />
+    </AppDataProvider>
+  )
+}
+
+function ShellContent() {
   const [sectionId, setSectionId] = useLocalStorage<SectionId>('currentTab', 'sessions')
-  const { subjects, bonds, sessions, clearAll } = useKnownData()
+  const { clearAll } = useKnownData()
+  const { subjects, bonds, sessions } = useAppData()
   const { user } = useCurrentUser()
   const section = SECTIONS.find((s) => s.id === sectionId) ?? SECTIONS[2]
   const Page = section.page
 
   const counts: Record<SectionId, number> = {
-    subjects: Object.keys(subjects).length,
-    bonds: Object.keys(bonds).length,
-    sessions: Object.keys(sessions).length,
+    subjects: subjects.items.length,
+    bonds: bonds.items.length,
+    sessions: sessions.items.length,
   }
 
   return (
