@@ -55,6 +55,10 @@ docker compose up --build
 
 Open `http://localhost:3000`. nginx serves the build and forwards `/api/` to the API, so the browser sees a single origin. The API address comes from the `API_URL` environment variable (default `http://host.docker.internal:8080`, the API on your machine); if another program uses port 8080 on your machine, point it elsewhere, for example `API_URL=http://other-host:8080 docker compose up --build`.
 
+### Logging in
+
+The client opens on a login screen. The sample users from the API's seed all use the password `senha123`, and the buttons under the form fill them in. The token is kept in memory only, so reloading the page logs out; a `401` from the API (expired or invalid token) also brings back the login screen.
+
 ### Commands
 
 | Command | What it does |
@@ -69,21 +73,20 @@ Open `http://localhost:3000`. nginx serves the build and forwards `/api/` to the
 ```
 src/
 ├── api/          central HTTP client and one function per API endpoint
-├── components/   reusable components (status badge, messages, user switcher)
+├── components/   reusable components (status badge, messages, logged-in user bar)
 ├── config/       temporary test data (users and database records)
-├── context/      shared state (current user, known records)
-├── features/     one folder per screen: subjects, bonds, sessions
+├── context/      shared state (session: token and current user; known records)
+├── features/     one folder per screen: login, subjects, bonds, sessions
 ├── hooks/        useLocalStorage, useApiAction
-└── lib/          date and time zone formatting
+└── lib/          date and time zone formatting, reading the user id from the token
 ```
 
 The [usage guide](docs/USAGE.md) walks through every flow step by step, from an empty catalog to a session with a waitlist.
 
 ## Known limitations
 
-- **No login yet:** the "Acting as" switcher picks the user who performs each action; the user list is hardcoded in `src/config/testData.ts` and matches the API's sample data. Login arrives with the API's authentication.
 - **The API has no `GET` endpoints yet:** the lists only show what was created or changed from the screen itself (stored in `localStorage`). Changes the server makes to other records, such as waitlist promotion, don't show up until there is a way to query them.
-- **No user roles:** the approve/reject buttons show up for every user; the API decides.
+- **Admin buttons show up for every user:** the API already returns `403` to regular users; hiding the buttons is [#3](https://github.com/jg-abreu/tutoring-management/issues/3).
 
 ## History
 

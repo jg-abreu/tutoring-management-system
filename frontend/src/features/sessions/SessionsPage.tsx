@@ -33,13 +33,13 @@ export function SessionsPage() {
 
   const handleCancelSession = (session: Session) =>
     run(async () => {
-      saveSession(await sessionsApi.cancel(session.id, user.id))
+      saveSession(await sessionsApi.cancel(session.id))
       return 'Session cancelled.'
     })
 
   const handleEnroll = (session: Session) =>
     run(async () => {
-      const enrollment = await sessionsApi.enroll(session.id, user.id)
+      const enrollment = await sessionsApi.enroll(session.id)
       saveEnrollment(enrollment)
       return enrollment.status === 'WAITLISTED'
         ? `${user.label} joined the waitlist (position ${enrollment.queuePosition}).`
@@ -48,7 +48,7 @@ export function SessionsPage() {
 
   const handleCancelEnrollment = (enrollment: Enrollment) =>
     run(async () => {
-      saveEnrollment(await sessionsApi.cancelEnrollment(enrollment.id, user.id))
+      saveEnrollment(await sessionsApi.cancelEnrollment(enrollment.id))
       return `Enrollment of ${userLabel(enrollment.student.id)} cancelled.`
     })
 
@@ -61,7 +61,6 @@ export function SessionsPage() {
       <Feedback message={feedback} onClose={clearFeedback} />
 
       <CreateSessionForm
-        userUuid={user.id}
         userLabel={user.label}
         bondOptions={bondOptions}
         busy={busy}

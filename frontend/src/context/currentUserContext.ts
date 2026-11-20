@@ -1,15 +1,30 @@
 import { createContext, useContext } from 'react'
-import type { TestUser } from '../config/testData'
+import type { UserRole } from '../api/types'
 
-type CurrentUserContextValue = {
-  user: TestUser
-  setUserId: (id: string) => void
+export type CurrentUser = {
+  id: string
+  email: string
+  role: UserRole
+  label: string
 }
 
-export const CurrentUserContext = createContext<CurrentUserContextValue | null>(null)
+type SessionContextValue = {
+  user: CurrentUser | null
+  sessionExpired: boolean
+  login: (email: string, password: string) => Promise<void>
+  logout: () => void
+}
+
+export const CurrentUserContext = createContext<SessionContextValue | null>(null)
+
+export function useSession() {
+  const context = useContext(CurrentUserContext)
+  if (!context) throw new Error('useSession must be used inside CurrentUserProvider')
+  return context
+}
 
 export function useCurrentUser() {
-  const context = useContext(CurrentUserContext)
-  if (!context) throw new Error('useCurrentUser must be used inside CurrentUserProvider')
-  return context
+  const { user, logout } = useSession()
+  if (!user) throw new Error('useCurrentUser must be used while logged in')
+  return { user, logout }
 }

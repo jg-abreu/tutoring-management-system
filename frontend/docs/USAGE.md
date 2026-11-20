@@ -6,24 +6,26 @@ The examples assume the API runs with Docker from the [API repository](https://g
 
 ## 0. Prepare the users (without Docker only)
 
-There is no sign-up or login yet (planned for v2.0), so users are inserted directly into the API's database:
+There is no sign-up yet, so users are inserted directly into the API's database. The hash below is the bcrypt hash of `senha123`, the same one the Docker sample data uses:
 
 ```sql
-INSERT INTO users (id, email, password_hash)
+INSERT INTO users (id, email, password_hash, role)
 VALUES
-    (gen_random_uuid(), 'tutor@test.com',    'no-login-in-v1'),
-    (gen_random_uuid(), 'admin@test.com',    'no-login-in-v1'),
-    (gen_random_uuid(), 'student1@test.com', 'no-login-in-v1'),
-    (gen_random_uuid(), 'student2@test.com', 'no-login-in-v1'),
-    (gen_random_uuid(), 'student3@test.com', 'no-login-in-v1')
+    (gen_random_uuid(), 'tutor@test.com',    '$2a$10$sCjVLw/LecIPwooVmD8dJuNMF.eEiHpRaq0sDXkgb6VWm7qGq1KVy', 'USER'),
+    (gen_random_uuid(), 'admin@test.com',    '$2a$10$sCjVLw/LecIPwooVmD8dJuNMF.eEiHpRaq0sDXkgb6VWm7qGq1KVy', 'ADMIN'),
+    (gen_random_uuid(), 'student1@test.com', '$2a$10$sCjVLw/LecIPwooVmD8dJuNMF.eEiHpRaq0sDXkgb6VWm7qGq1KVy', 'USER'),
+    (gen_random_uuid(), 'student2@test.com', '$2a$10$sCjVLw/LecIPwooVmD8dJuNMF.eEiHpRaq0sDXkgb6VWm7qGq1KVy', 'USER'),
+    (gen_random_uuid(), 'student3@test.com', '$2a$10$sCjVLw/LecIPwooVmD8dJuNMF.eEiHpRaq0sDXkgb6VWm7qGq1KVy', 'USER')
 RETURNING id, email;
 ```
 
-Copy the returned UUIDs into the `TEST_USERS` list in [`src/config/testData.ts`](../src/config/testData.ts). In the same file, empty `KNOWN_SUBJECTS` and `KNOWN_BONDS`, since they point to records from the sample data.
+Copy the returned UUIDs and emails into the `TEST_USERS` list in [`src/config/testData.ts`](../src/config/testData.ts), so the login screen fills them in and the lists show names. In the same file, empty `KNOWN_SUBJECTS` and `KNOWN_BONDS`, since they point to records from the sample data.
 
-## 1. Choose who is acting
+## 1. Log in
 
-The **"Acting as"** switcher at the top of the screen sets which user performs each action. It stands in for the login, so switch users whenever a step asks you to.
+Log in with a user's email and password (`senha123` for the sample users); the buttons under the form fill them in. The header shows who is logged in and their role (`ADMIN` or `USER`). Whenever a step asks for another user, click **Log out** and log in as that user.
+
+The session lives only in memory: reloading the page, or a token that expires after 2 hours, brings back the login screen.
 
 ## 2. Create a subject ("1. Subjects" tab)
 

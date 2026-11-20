@@ -1,9 +1,10 @@
-import { UserSwitcher } from './components/UserSwitcher'
+import { CurrentUserBar } from './components/CurrentUserBar'
 import { CurrentUserProvider } from './context/CurrentUser'
-import { useCurrentUser } from './context/currentUserContext'
+import { useCurrentUser, useSession } from './context/currentUserContext'
 import { KnownDataProvider } from './context/KnownData'
 import { useKnownData } from './context/knownDataContext'
 import { BondsPage } from './features/bonds/BondsPage'
+import { LoginPage } from './features/login/LoginPage'
 import { SessionsPage } from './features/sessions/SessionsPage'
 import { SubjectsPage } from './features/subjects/SubjectsPage'
 import { useLocalStorage } from './hooks/useLocalStorage'
@@ -28,7 +29,7 @@ function Shell() {
         <div className="app-title">
           <h1>Tutoring</h1>
         </div>
-        <UserSwitcher />
+        <CurrentUserBar />
       </header>
 
       <nav className="tabs" aria-label="Sections">
@@ -63,11 +64,16 @@ function Shell() {
   )
 }
 
+function AppContent() {
+  const { user } = useSession()
+  return user ? <Shell /> : <LoginPage />
+}
+
 export default function App() {
   return (
     <CurrentUserProvider>
       <KnownDataProvider>
-        <Shell />
+        <AppContent />
       </KnownDataProvider>
     </CurrentUserProvider>
   )
