@@ -5,7 +5,7 @@ services:
   frontend:
     build: .
     environment:
-      API_URL: http://host.docker.internal:8080
+      API_URL: ${API_URL:-http://host.docker.internal:8080}
     extra_hosts:
       # Makes host.docker.internal resolve on Linux too (Docker Desktop already provides it)
       - "host.docker.internal:host-gateway"
