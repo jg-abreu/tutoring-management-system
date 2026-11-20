@@ -353,3 +353,17 @@ select {
 .badge-revoked {
   color: var(--muted);
 }
+
+.login-page {
+  display: grid;
+  gap: 16px;
+  max-width: 440px;
+  margin: 48px auto;
+  padding: 0 16px;
+}
+
+.sample-user-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
