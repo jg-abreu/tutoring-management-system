@@ -61,7 +61,7 @@ Open `http://localhost:3000`. nginx serves the build and forwards `/api/` to the
 
 ### Logging in
 
-The client opens on a login screen. The sample users from the API's seed all use the password `senha123`, and picking one in the sample users list fills in the form. The token is kept in memory only, so reloading the page logs out; a `401` from the API (expired or invalid token) also brings back the login screen.
+The client opens on a login screen. The sample users from the API's seed all use the password `senha123`, and picking one in the sample users list fills in the form. The token is kept in memory only, so reloading the page logs out; a `401` from the API (expired or invalid token) also brings back the login screen. Approve, reject and revoke only show for admins; the role comes from the login response, and the API still refuses those actions with `403` for anyone else.
 
 ### Commands
 
@@ -90,7 +90,6 @@ The [usage guide](docs/USAGE.md) walks through every flow step by step, from an 
 ## Known limitations
 
 - **The API has no `GET` endpoints yet:** the lists only show what was created or changed from the screen itself (stored in `localStorage`). Changes the server makes to other records, such as waitlist promotion, don't show up until there is a way to query them.
-- **Admin buttons show up for every user:** the API already returns `403` to regular users; hiding the buttons is [#3](https://github.com/jg-abreu/tutoring-management/issues/3).
 
 ## History
 
