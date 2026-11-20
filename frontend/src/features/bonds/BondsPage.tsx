@@ -23,6 +23,7 @@ export function BondsPage() {
   const { subjects, bonds, saveBond } = useKnownData()
   const { busy, feedback, run, clearFeedback } = useApiAction()
   const [subjectUuid, setSubjectUuid] = useState('')
+  const isAdmin = user.role === 'ADMIN'
 
   const approvedSubjects = [
     ...KNOWN_SUBJECTS,
@@ -89,7 +90,7 @@ export function BondsPage() {
                   </p>
                 </div>
                 <StatusBadge status={bond.status} />
-                {(bond.status === 'PENDING' || bond.status === 'APPROVED') && (
+                {isAdmin && (bond.status === 'PENDING' || bond.status === 'APPROVED') && (
                   <div className="item-actions">
                     {bond.status === 'PENDING' && (
                       <>

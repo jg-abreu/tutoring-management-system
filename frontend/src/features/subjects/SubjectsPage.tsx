@@ -14,6 +14,7 @@ export function SubjectsPage() {
   const { subjects, saveSubject } = useKnownData()
   const { busy, feedback, run, clearFeedback } = useApiAction()
   const [name, setName] = useState('')
+  const isAdmin = user.role === 'ADMIN'
 
   function handleSuggest(e: FormEvent) {
     e.preventDefault()
@@ -81,7 +82,7 @@ export function SubjectsPage() {
                   </p>
                 </div>
                 <StatusBadge status={subject.status} />
-                {subject.status === 'PENDING' && (
+                {isAdmin && subject.status === 'PENDING' && (
                   <div className="item-actions">
                     <button type="button" className="btn btn-small btn-primary" disabled={busy} onClick={() => decide(subject, true)}>
                       Approve
