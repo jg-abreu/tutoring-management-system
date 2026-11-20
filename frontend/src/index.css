@@ -905,3 +905,111 @@ input[type='datetime-local'] {
   display: flex;
   gap: 0.5rem;
 }
+
+/* Login: intro and form on the left, sample users on the right. */
+.login-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    'intro users'
+    'form users';
+  align-items: start;
+  gap: 1.5rem 3rem;
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 3rem var(--gutter) 4rem;
+}
+
+.login-intro {
+  grid-area: intro;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.login-intro p {
+  max-width: 44ch;
+}
+
+.login-form {
+  grid-area: form;
+}
+
+.sample-users {
+  grid-area: users;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sample-users h2 {
+  font-size: 1rem;
+}
+
+.sample-users > p {
+  font-size: 0.88rem;
+}
+
+.sample-user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sample-user {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sample-user:hover {
+  border-color: var(--fg-muted);
+}
+
+.sample-user-selected {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.sample-user-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+  font-size: 0.9rem;
+}
+
+.sample-user-text .muted {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.8rem;
+}
+
+.role-tag {
+  color: var(--fg-muted);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 720px) {
+  .login-page {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'intro'
+      'form'
+      'users';
+    padding-top: 2rem;
+  }
+}
