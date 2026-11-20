@@ -650,3 +650,224 @@ input[type='datetime-local'] {
     grid-column: auto;
   }
 }
+
+/* Sessions as a timetable: the day on the left, its sessions as rows on the right. */
+.timetable {
+  display: flex;
+  flex-direction: column;
+}
+
+.day {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: 1.25rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.day-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+  letter-spacing: normal;
+}
+
+.day-weekday,
+.day-month {
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.day-number {
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.day-sessions {
+  display: flex;
+  flex-direction: column;
+}
+
+.session-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding-bottom: 1.5rem;
+}
+
+.session-row + .session-row {
+  padding-top: 1.5rem;
+  border-top: 1px dashed var(--line);
+}
+
+.session-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 1rem;
+}
+
+.session-head > * {
+  grid-column: 1;
+}
+
+.session-head .badge {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  align-self: start;
+}
+
+.session-time {
+  color: var(--brand);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.session-head h3 {
+  font-size: 1.2rem;
+}
+
+.session-cancelled .session-head h3 {
+  color: var(--fg-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.session-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.enrollment-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.92rem;
+}
+
+.enrollment-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  min-height: 2.5rem;
+}
+
+.enrollment-name {
+  min-width: 6rem;
+  font-weight: 500;
+}
+
+.session-id {
+  font-size: 0.8rem;
+}
+
+/* Seat map: one seat per spot, then the waitlist after a divider. */
+.seat-map {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.seats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.seat {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1.5px dashed color-mix(in srgb, var(--fg-muted) 70%, transparent);
+  border-radius: 0.7rem 0.7rem 0.35rem 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.seat-taken {
+  background: var(--accent);
+  border: 1.5px solid var(--accent);
+  color: var(--on-accent);
+}
+
+.seat-waiting {
+  background: color-mix(in srgb, var(--wait) 14%, transparent);
+  border: 1.5px solid var(--wait);
+  border-radius: 50%;
+  color: var(--wait);
+}
+
+.seat-position {
+  position: absolute;
+  top: -0.4rem;
+  right: -0.4rem;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.2rem;
+  background: var(--wait);
+  border-radius: 999px;
+  color: var(--bg);
+  font-size: 0.65rem;
+  line-height: 1.1rem;
+  text-align: center;
+}
+
+.seat-divider {
+  width: 1px;
+  height: 1.75rem;
+  margin: 0 0.35rem;
+  background: var(--line);
+}
+
+.seat-legend {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.82rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .seat-new {
+    animation: seat-fill 0.5s var(--ease);
+  }
+}
+
+@keyframes seat-fill {
+  from {
+    background: color-mix(in srgb, var(--wait) 14%, transparent);
+    border-color: var(--wait);
+    color: var(--wait);
+    transform: scale(0.85);
+  }
+}
+
+.empty {
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 520px) {
+  .day {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  .day-label {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.4rem;
+  }
+
+  .day-number {
+    font-size: 1.5rem;
+  }
+}
