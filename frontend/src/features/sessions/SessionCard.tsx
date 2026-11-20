@@ -1,13 +1,12 @@
 import type { Enrollment, Session } from '../../api/types'
 import { SeatMap } from '../../components/SeatMap'
 import { StatusBadge } from '../../components/StatusBadge'
-import { userLabel } from '../../config/testData'
-import { formatTimeRange, shortId } from '../../lib/format'
+import { displayName, formatTimeRange, shortId } from '../../lib/format'
 
 type Props = {
   session: Session
   enrollments: Enrollment[]
-  currentUserId: string
+  currentUserLabel: string
   busy: boolean
   onEnroll: () => void
   onCancelSession: () => void
@@ -17,7 +16,7 @@ type Props = {
 export function SessionCard({
   session,
   enrollments,
-  currentUserId,
+  currentUserLabel,
   busy,
   onEnroll,
   onCancelSession,
@@ -30,7 +29,7 @@ export function SessionCard({
       <header className="session-head">
         <p className="session-time tabular">{formatTimeRange(session.startTime, session.endTime)}</p>
         <h3>{session.bond.subject.name}</h3>
-        <p className="muted">Tutor {userLabel(session.bond.requester.id)}</p>
+        <p className="muted">Tutor {displayName(session.bond.requester.email)}</p>
         <StatusBadge status={session.status} />
       </header>
 
@@ -39,7 +38,7 @@ export function SessionCard({
       {active && (
         <div className="session-actions">
           <button type="button" className="btn btn-primary btn-small" disabled={busy} onClick={onEnroll}>
-            Enroll {userLabel(currentUserId)}
+            Enroll {currentUserLabel}
           </button>
           <button type="button" className="btn btn-danger btn-small" disabled={busy} onClick={onCancelSession}>
             Cancel session
@@ -51,7 +50,7 @@ export function SessionCard({
         <ul className="enrollment-list">
           {enrollments.map((enrollment) => (
             <li key={enrollment.id}>
-              <span className="enrollment-name">{userLabel(enrollment.student.id)}</span>
+              <span className="enrollment-name">{displayName(enrollment.student.email)}</span>
               <StatusBadge
                 status={enrollment.status}
                 suffix={enrollment.queuePosition ? `#${enrollment.queuePosition}` : undefined}
@@ -63,7 +62,7 @@ export function SessionCard({
                   disabled={busy}
                   onClick={() => onCancelEnrollment(enrollment)}
                 >
-                  Cancel as {userLabel(currentUserId)}
+                  Cancel as {currentUserLabel}
                 </button>
               )}
             </li>

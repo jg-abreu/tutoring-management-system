@@ -2,16 +2,16 @@ import { useState, type FormEvent } from 'react'
 import { subjectsApi } from '../../api/catalog'
 import type { Subject } from '../../api/types'
 import { Feedback } from '../../components/Feedback'
+import { LoadState } from '../../components/LoadState'
 import { StatusBadge } from '../../components/StatusBadge'
-import { userLabel } from '../../config/testData'
+import { useAppData } from '../../context/appDataContext'
 import { useCurrentUser } from '../../context/currentUserContext'
-import { newestFirst, useKnownData } from '../../context/knownDataContext'
 import { useApiAction } from '../../hooks/useApiAction'
-import { shortId } from '../../lib/format'
+import { displayName, shortId } from '../../lib/format'
 
 export function SubjectsPage() {
   const { user } = useCurrentUser()
-  const { subjects, saveSubject } = useKnownData()
+  const { subjects, reloadSubjects } = useAppData()
   const { busy, feedback, run, clearFeedback } = useApiAction()
   const [name, setName] = useState('')
   const isAdmin = user.role === 'ADMIN'
@@ -20,22 +20,18 @@ export function SubjectsPage() {
     e.preventDefault()
     run(async () => {
       const subject = await subjectsApi.suggest(name.trim())
-      saveSubject(subject)
       setName('')
+      await reloadSubjects()
       return `Subject "${subject.name}" suggested. Now an admin needs to approve it.`
     })
   }
 
   const decide = (subject: Subject, approve: boolean) =>
     run(async () => {
-      const updated = approve
-        ? await subjectsApi.approve(subject.id)
-        : await subjectsApi.reject(subject.id)
-      saveSubject(updated)
+      const updated = approve ? await subjectsApi.approve(subject.id) : await subjectsApi.reject(subject.id)
+      await reloadSubjects()
       return `Subject "${updated.name}" ${approve ? 'approved' : 'rejected'}.`
     })
-
-  const list = newestFirst(subjects)
 
   return (
     <div className="page">
@@ -65,17 +61,16 @@ export function SubjectsPage() {
         <h2 id="subject-list" className="visually-hidden">
           Subject list
         </h2>
-        {list.length === 0 ? (
-          <p className="empty muted">No subjects yet. Suggest one above; an admin approves or rejects it.</p>
-        ) : (
+        <LoadState list={subjects} onRetry={reloadSubjects} emptyText="No subjects yet. Suggest one above; an admin approves or rejects it." />
+        {subjects.items.length > 0 && (
           <ul className="item-list">
-            {list.map((subject) => (
+            {subjects.items.map((subject) => (
               <li key={subject.id} className="item">
                 <div className="item-main">
                   <h3>{subject.name}</h3>
                   <p className="item-meta muted">
-                    <span>Suggested by {userLabel(subject.creator.id)}</span>
-                    {subject.evaluator && <span>Evaluated by {userLabel(subject.evaluator.id)}</span>}
+                    <span>Suggested by {displayName(subject.creator.email)}</span>
+                    {subject.evaluator && <span>Evaluated by {displayName(subject.evaluator.email)}</span>}
                     <span className="mono" title={subject.id}>
                       {shortId(subject.id)}
                     </span>
