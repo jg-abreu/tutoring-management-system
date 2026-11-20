@@ -77,6 +77,8 @@ src/
 └── lib/          date and time zone formatting
 ```
 
+The [usage guide](docs/USAGE.md) walks through every flow step by step, from an empty catalog to a session with a waitlist.
+
 ## Known limitations
 
 - **No login yet:** the "Acting as" switcher picks the user who performs each action; the user list is hardcoded in `src/config/testData.ts` and matches the API's sample data. Login arrives with the API's authentication.
