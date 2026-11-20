@@ -1,8 +1,10 @@
 import { useState, type FormEvent } from 'react'
 import { ApiError } from '../../api/client'
+import { AppHeader } from '../../components/AppHeader'
 import { Feedback, type FeedbackMessage } from '../../components/Feedback'
 import { SAMPLE_PASSWORD, TEST_USERS } from '../../config/testData'
 import { useSession } from '../../context/currentUserContext'
+import { initials } from '../../lib/format'
 
 export function LoginPage() {
   const { login, sessionExpired } = useSession()
@@ -32,43 +34,66 @@ export function LoginPage() {
   }
 
   return (
-    <main className="login-page">
-      <form className="card form" onSubmit={handleSubmit}>
-        <h1>Tutoring</h1>
-        <p className="muted field-wide">Log in to manage subjects, tutoring bonds and sessions.</p>
-        <Feedback message={feedback} onClose={() => setFeedback(null)} />
-        <label className="field field-wide">
-          <span>Email</span>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" required />
-        </label>
-        <label className="field field-wide">
-          <span>Password</span>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-            required
-          />
-        </label>
-        <div className="form-actions">
-          <button type="submit" className="btn btn-primary" disabled={busy}>
-            {busy ? 'Logging in…' : 'Log in'}
-          </button>
+    <>
+      <AppHeader />
+      <main className="login-page">
+        <div className="login-intro">
+          <h1>Log in</h1>
+          <p className="muted">
+            Admins approve who can tutor each subject, tutors open sessions with limited spots, and students enroll, with
+            an automatic waitlist when a session is full.
+          </p>
         </div>
-      </form>
 
-      <section className="card sample-users">
-        <h2>Sample users</h2>
-        <p className="muted">From the API's sample data. Click one to fill in the form.</p>
-        <div className="sample-user-list">
-          {TEST_USERS.map((u) => (
-            <button key={u.id} type="button" className="btn btn-small" onClick={() => fillIn(u.email)}>
-              {u.label} · {u.role}
+        <form className="card form login-form" onSubmit={handleSubmit}>
+          <Feedback message={feedback} onClose={() => setFeedback(null)} />
+          <label className="field field-wide">
+            <span>Email</span>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" required />
+          </label>
+          <label className="field field-wide">
+            <span>Password</span>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              required
+            />
+          </label>
+          <div className="form-actions">
+            <button type="submit" className="btn btn-primary" disabled={busy}>
+              {busy ? 'Logging in…' : 'Log in'}
             </button>
-          ))}
-        </div>
-      </section>
-    </main>
+          </div>
+        </form>
+
+        <section className="sample-users" aria-labelledby="sample-users-title">
+          <h2 id="sample-users-title">Sample users</h2>
+          <p className="muted">From the API's sample data, all with the same password. Pick one to fill in the form.</p>
+          <ul className="sample-user-list">
+            {TEST_USERS.map((u) => (
+              <li key={u.id}>
+                <button
+                  type="button"
+                  className={`sample-user${email === u.email ? ' sample-user-selected' : ''}`}
+                  aria-pressed={email === u.email}
+                  onClick={() => fillIn(u.email)}
+                >
+                  <span className="avatar" aria-hidden="true">
+                    {initials(u.label)}
+                  </span>
+                  <span className="sample-user-text">
+                    <strong>{u.label}</strong>
+                    <span className="muted">{u.email}</span>
+                  </span>
+                  <span className="role-tag">{u.role === 'Admin' ? 'Admin' : `User, ${u.role.toLowerCase()}`}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </main>
+    </>
   )
 }

@@ -1,7 +1,8 @@
 import type { Enrollment, Session } from '../../api/types'
+import { SeatMap } from '../../components/SeatMap'
 import { StatusBadge } from '../../components/StatusBadge'
 import { userLabel } from '../../config/testData'
-import { formatRange, shortId } from '../../lib/format'
+import { formatTimeRange, shortId } from '../../lib/format'
 
 type Props = {
   session: Session
@@ -25,53 +26,32 @@ export function SessionCard({
   const active = session.status === 'ACTIVE'
 
   return (
-    <article className="card session-card">
-      <header className="session-header">
-        <div>
-          <h3>{session.bond.subject.name}</h3>
-          <p className="muted">
-            {formatRange(session.startTime, session.endTime)} · tutor {userLabel(session.bond.requester.id)}
-          </p>
-        </div>
+    <article className={`session-row${active ? '' : ' session-cancelled'}`}>
+      <header className="session-head">
+        <p className="session-time tabular">{formatTimeRange(session.startTime, session.endTime)}</p>
+        <h3>{session.bond.subject.name}</h3>
+        <p className="muted">Tutor {userLabel(session.bond.requester.id)}</p>
         <StatusBadge status={session.status} />
       </header>
 
-      <dl className="session-facts">
-        <div>
-          <dt>Capacity</dt>
-          <dd>{session.spots}</dd>
-        </div>
-        <div>
-          <dt>Waitlist</dt>
-          <dd>{session.allowsWaitlist ? 'Yes' : 'No'}</dd>
-        </div>
-        <div>
-          <dt>ID</dt>
-          <dd className="mono" title={session.id}>
-            {shortId(session.id)}
-          </dd>
-        </div>
-      </dl>
+      <SeatMap spots={session.spots} allowsWaitlist={session.allowsWaitlist} enrollments={enrollments} />
 
       {active && (
         <div className="session-actions">
-          <button type="button" className="btn btn-primary" disabled={busy} onClick={onEnroll}>
+          <button type="button" className="btn btn-primary btn-small" disabled={busy} onClick={onEnroll}>
             Enroll {userLabel(currentUserId)}
           </button>
-          <button type="button" className="btn btn-danger" disabled={busy} onClick={onCancelSession}>
+          <button type="button" className="btn btn-danger btn-small" disabled={busy} onClick={onCancelSession}>
             Cancel session
           </button>
         </div>
       )}
 
-      <h4>Enrollments made from this screen</h4>
-      {enrollments.length === 0 ? (
-        <p className="muted">None yet.</p>
-      ) : (
+      {enrollments.length > 0 && (
         <ul className="enrollment-list">
           {enrollments.map((enrollment) => (
             <li key={enrollment.id}>
-              <span>{userLabel(enrollment.student.id)}</span>
+              <span className="enrollment-name">{userLabel(enrollment.student.id)}</span>
               <StatusBadge
                 status={enrollment.status}
                 suffix={enrollment.queuePosition ? `#${enrollment.queuePosition}` : undefined}
@@ -79,7 +59,7 @@ export function SessionCard({
               {active && (enrollment.status === 'CONFIRMED' || enrollment.status === 'WAITLISTED') && (
                 <button
                   type="button"
-                  className="btn btn-small"
+                  className="btn btn-small btn-ghost"
                   disabled={busy}
                   onClick={() => onCancelEnrollment(enrollment)}
                 >
@@ -90,6 +70,13 @@ export function SessionCard({
           ))}
         </ul>
       )}
+
+      <p className="session-id muted">
+        Session ID{' '}
+        <span className="mono" title={session.id}>
+          {shortId(session.id)}
+        </span>
+      </p>
     </article>
   )
 }

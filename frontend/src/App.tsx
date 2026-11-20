@@ -1,4 +1,5 @@
-import { CurrentUserBar } from './components/CurrentUserBar'
+import { Sidebar } from './components/Sidebar'
+import { AppHeader } from './components/AppHeader'
 import { CurrentUserProvider } from './context/CurrentUser'
 import { useCurrentUser, useSession } from './context/currentUserContext'
 import { KnownDataProvider } from './context/KnownData'
@@ -9,57 +10,51 @@ import { SessionsPage } from './features/sessions/SessionsPage'
 import { SubjectsPage } from './features/subjects/SubjectsPage'
 import { useLocalStorage } from './hooks/useLocalStorage'
 
-const TABS = [
-  { id: 'subjects', label: '1. Subjects', page: SubjectsPage },
-  { id: 'bonds', label: '2. Tutoring bonds', page: BondsPage },
-  { id: 'sessions', label: '3. Sessions', page: SessionsPage },
+const SECTIONS = [
+  { id: 'subjects', label: 'Subjects', page: SubjectsPage },
+  { id: 'bonds', label: 'Tutoring bonds', page: BondsPage },
+  { id: 'sessions', label: 'Sessions', page: SessionsPage },
 ] as const
 
-type TabId = (typeof TABS)[number]['id']
+type SectionId = (typeof SECTIONS)[number]['id']
 
 function Shell() {
-  const [tabId, setTabId] = useLocalStorage<TabId>('currentTab', 'sessions')
-  const { clearAll } = useKnownData()
+  const [sectionId, setSectionId] = useLocalStorage<SectionId>('currentTab', 'sessions')
+  const { subjects, bonds, sessions, clearAll } = useKnownData()
   const { user } = useCurrentUser()
-  const Page = (TABS.find((t) => t.id === tabId) ?? TABS[2]).page
+  const section = SECTIONS.find((s) => s.id === sectionId) ?? SECTIONS[2]
+  const Page = section.page
+
+  const counts: Record<SectionId, number> = {
+    subjects: Object.keys(subjects).length,
+    bonds: Object.keys(bonds).length,
+    sessions: Object.keys(sessions).length,
+  }
 
   return (
     <>
-      <header className="app-header">
-        <div className="app-title">
-          <h1>Tutoring</h1>
-        </div>
-        <CurrentUserBar />
-      </header>
+      <AppHeader />
+      <div className="app-body">
+        <Sidebar
+          sections={SECTIONS.map((s) => ({ id: s.id, label: s.label, count: counts[s.id] }))}
+          currentId={section.id}
+          onSelect={(id) => setSectionId(id as SectionId)}
+        />
 
-      <nav className="tabs" aria-label="Sections">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            className={`tab${tab.id === tabId ? ' tab-active' : ''}`}
-            aria-current={tab.id === tabId ? 'page' : undefined}
-            onClick={() => setTabId(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </nav>
-
-      <main>
-        <section className="notice">
-          <div>
-            <strong>Current limitation:</strong> the API has no <code>GET</code> endpoints yet. The lists only show
-            what was created or changed from this screen (stored in the browser), and changes the server makes to other
-            records — such as waitlist promotions — don't show up on their own.
-          </div>
-          <button type="button" className="btn btn-small" onClick={clearAll}>
-            Clear local data
-          </button>
-        </section>
-        {/* key: switching users remounts the page, clearing the message and the forms */}
-        <Page key={user.id} />
-      </main>
+        <main className="content">
+          <h1>{section.label}</h1>
+          <p className="local-note">
+            <span>
+              The API has no <code>GET</code> endpoints yet, so lists show only what this browser created or changed.
+              Changes the server makes on its own, like a waitlist promotion, don't show up here.
+            </span>
+            <button type="button" className="btn btn-small btn-ghost" onClick={clearAll}>
+              Clear local data
+            </button>
+          </p>
+          <Page key={user.id} />
+        </main>
+      </div>
     </>
   )
 }

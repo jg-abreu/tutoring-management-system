@@ -60,36 +60,42 @@ export function SubjectsPage() {
         </div>
       </form>
 
-      <h2>Subjects ({list.length})</h2>
-      {list.length === 0 ? (
-        <p className="muted">No subjects suggested from this screen yet.</p>
-      ) : (
-        list.map((subject) => (
-          <article key={subject.id} className="card row-card">
-            <div className="row-main">
-              <h3>{subject.name}</h3>
-              <p className="muted">
-                suggested by {userLabel(subject.creator.id)}
-                {subject.evaluator && ` · evaluated by ${userLabel(subject.evaluator.id)}`} ·{' '}
-                <span className="mono" title={subject.id}>
-                  {shortId(subject.id)}
-                </span>
-              </p>
-            </div>
-            <StatusBadge status={subject.status} />
-            {subject.status === 'PENDING' && (
-              <div className="row-actions">
-                <button type="button" className="btn btn-small btn-primary" disabled={busy} onClick={() => decide(subject, true)}>
-                  Approve
-                </button>
-                <button type="button" className="btn btn-small btn-danger" disabled={busy} onClick={() => decide(subject, false)}>
-                  Reject
-                </button>
-              </div>
-            )}
-          </article>
-        ))
-      )}
+      <section aria-labelledby="subject-list">
+        <h2 id="subject-list" className="visually-hidden">
+          Subject list
+        </h2>
+        {list.length === 0 ? (
+          <p className="empty muted">No subjects yet. Suggest one above; an admin approves or rejects it.</p>
+        ) : (
+          <ul className="item-list">
+            {list.map((subject) => (
+              <li key={subject.id} className="item">
+                <div className="item-main">
+                  <h3>{subject.name}</h3>
+                  <p className="item-meta muted">
+                    <span>Suggested by {userLabel(subject.creator.id)}</span>
+                    {subject.evaluator && <span>Evaluated by {userLabel(subject.evaluator.id)}</span>}
+                    <span className="mono" title={subject.id}>
+                      {shortId(subject.id)}
+                    </span>
+                  </p>
+                </div>
+                <StatusBadge status={subject.status} />
+                {subject.status === 'PENDING' && (
+                  <div className="item-actions">
+                    <button type="button" className="btn btn-small btn-primary" disabled={busy} onClick={() => decide(subject, true)}>
+                      Approve
+                    </button>
+                    <button type="button" className="btn btn-small btn-danger" disabled={busy} onClick={() => decide(subject, false)}>
+                      Reject
+                    </button>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   )
 }

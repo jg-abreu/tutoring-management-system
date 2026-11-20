@@ -8,7 +8,10 @@
 Web client for the [Tutoring Management API](https://github.com/jg-abreu/tutoring-management-api). It covers the whole flow in the browser: suggesting and approving subjects, requesting and evaluating tutoring bonds, creating and cancelling sessions, enrolling students and cancelling enrollments (with a waitlist).
 
 <p align="center">
-  <img src="docs/images/session-waitlist.png" alt="A Calculus I session with capacity 2: two students confirmed and a third on the waitlist at position 1" width="720">
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="docs/images/session-waitlist-light.png">
+    <img src="docs/images/session-waitlist.png" alt="A Calculus I session with capacity 2 shown as a seat map: two seats taken by student1 and student2, and student3 first on the waitlist" width="720">
+  </picture>
 </p>
 
 The business rules, the database and the tests live in the API repository; this client exists to demo them.
@@ -18,7 +21,8 @@ The business rules, the database and the tests live in the API repository; this 
 - **React 19** + **TypeScript**
 - **Vite** (dev server and build)
 - **oxlint** (linting)
-- No UI, state or HTTP libraries: native `fetch`, Context API, plain CSS with variables and automatic dark mode
+- No UI, state or HTTP libraries: native `fetch`, Context API and plain CSS
+- Same visual identity as [joaoabreu.dev](https://joaoabreu.dev): its color tokens, Inter and JetBrains Mono (through Fontsource, bundled with the build), dark and light themes with a toggle that remembers the choice
 
 ## Running
 
@@ -57,7 +61,7 @@ Open `http://localhost:3000`. nginx serves the build and forwards `/api/` to the
 
 ### Logging in
 
-The client opens on a login screen. The sample users from the API's seed all use the password `senha123`, and the buttons under the form fill them in. The token is kept in memory only, so reloading the page logs out; a `401` from the API (expired or invalid token) also brings back the login screen.
+The client opens on a login screen. The sample users from the API's seed all use the password `senha123`, and picking one in the sample users list fills in the form. The token is kept in memory only, so reloading the page logs out; a `401` from the API (expired or invalid token) also brings back the login screen.
 
 ### Commands
 
@@ -73,7 +77,7 @@ The client opens on a login screen. The sample users from the API's seed all use
 ```
 src/
 ├── api/          central HTTP client and one function per API endpoint
-├── components/   reusable components (status badge, messages, logged-in user bar)
+├── components/   reusable components (header, sidebar, theme toggle, seat map, status badge, messages)
 ├── config/       temporary test data (users and database records)
 ├── context/      shared state (session: token and current user; known records)
 ├── features/     one folder per screen: login, subjects, bonds, sessions
