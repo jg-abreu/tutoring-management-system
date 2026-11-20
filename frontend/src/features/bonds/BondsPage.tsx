@@ -2,13 +2,13 @@ import { useState, type FormEvent } from 'react'
 import { bondsApi } from '../../api/catalog'
 import type { TutoringBond } from '../../api/types'
 import { Feedback } from '../../components/Feedback'
+import { LoadState } from '../../components/LoadState'
+import { RecordSelect } from '../../components/RecordSelect'
 import { StatusBadge } from '../../components/StatusBadge'
-import { UuidInput } from '../../components/UuidInput'
-import { KNOWN_SUBJECTS, userLabel } from '../../config/testData'
+import { useAppData } from '../../context/appDataContext'
 import { useCurrentUser } from '../../context/currentUserContext'
-import { newestFirst, useKnownData } from '../../context/knownDataContext'
 import { useApiAction } from '../../hooks/useApiAction'
-import { shortId } from '../../lib/format'
+import { displayName, shortId } from '../../lib/format'
 
 type Decision = 'approve' | 'reject' | 'revoke'
 
@@ -20,35 +20,31 @@ const DECISION_TEXT: Record<Decision, string> = {
 
 export function BondsPage() {
   const { user } = useCurrentUser()
-  const { subjects, bonds, saveBond } = useKnownData()
+  const { subjects, bonds, reloadBonds, reloadSessions } = useAppData()
   const { busy, feedback, run, clearFeedback } = useApiAction()
   const [subjectUuid, setSubjectUuid] = useState('')
   const isAdmin = user.role === 'ADMIN'
 
-  const approvedSubjects = [
-    ...KNOWN_SUBJECTS,
-    ...newestFirst(subjects)
-      .filter((s) => s.status === 'APPROVED' && !KNOWN_SUBJECTS.some((k) => k.id === s.id))
-      .map((s) => ({ id: s.id, label: s.name })),
-  ]
+  const approvedSubjects = subjects.items
+    .filter((s) => s.status === 'APPROVED')
+    .map((s) => ({ id: s.id, label: s.name }))
 
   function handleRequest(e: FormEvent) {
     e.preventDefault()
     run(async () => {
-      const bond = await bondsApi.request(subjectUuid.trim())
-      saveBond(bond)
+      const bond = await bondsApi.request(subjectUuid)
+      setSubjectUuid('')
+      await reloadBonds()
       return `Tutoring bond for ${user.label} in "${bond.subject.name}" requested. Now an admin needs to approve it.`
     })
   }
 
   const decide = (bond: TutoringBond, decision: Decision) =>
     run(async () => {
-      const updated = await bondsApi[decision](bond.id)
-      saveBond(updated)
+      await bondsApi[decision](bond.id)
+      await Promise.all(decision === 'revoke' ? [reloadBonds(), reloadSessions()] : [reloadBonds()])
       return `Tutoring bond ${DECISION_TEXT[decision]}.`
     })
-
-  const list = newestFirst(bonds)
 
   return (
     <div className="page">
@@ -56,14 +52,16 @@ export function BondsPage() {
 
       <form className="card form" onSubmit={handleRequest}>
         <h2>Request a tutoring bond</h2>
-        <UuidInput
-          label="Subject (must be approved)"
+        <RecordSelect
+          label="Subject"
           value={subjectUuid}
           onChange={setSubjectUuid}
           options={approvedSubjects}
+          placeholder="Pick an approved subject"
+          emptyText="No approved subjects yet"
         />
         <div className="form-actions">
-          <button type="submit" className="btn btn-primary" disabled={busy}>
+          <button type="submit" className="btn btn-primary" disabled={busy || approvedSubjects.length === 0}>
             Request as {user.label}
           </button>
         </div>
@@ -73,17 +71,20 @@ export function BondsPage() {
         <h2 id="bond-list" className="visually-hidden">
           Tutoring bond list
         </h2>
-        {list.length === 0 ? (
-          <p className="empty muted">No tutoring bonds yet. Request one above for an approved subject.</p>
-        ) : (
+        <LoadState
+          list={bonds}
+          onRetry={reloadBonds}
+          emptyText={isAdmin ? 'No tutoring bonds yet.' : 'You have no tutoring bonds yet. Request one above for an approved subject.'}
+        />
+        {bonds.items.length > 0 && (
           <ul className="item-list">
-            {list.map((bond) => (
+            {bonds.items.map((bond) => (
               <li key={bond.id} className="item">
                 <div className="item-main">
                   <h3>{bond.subject.name}</h3>
                   <p className="item-meta muted">
-                    <span>Tutor {userLabel(bond.requester.id)}</span>
-                    {bond.evaluator && <span>Evaluated by {userLabel(bond.evaluator.id)}</span>}
+                    <span>Tutor {displayName(bond.requester.email)}</span>
+                    {bond.evaluator && <span>Evaluated by {displayName(bond.evaluator.email)}</span>}
                     <span className="mono" title={bond.id}>
                       {shortId(bond.id)}
                     </span>

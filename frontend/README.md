@@ -78,10 +78,10 @@ The client opens on a login screen. The sample users from the API's seed all use
 src/
 ├── api/          central HTTP client and one function per API endpoint
 ├── components/   reusable components (header, sidebar, theme toggle, seat map, status badge, messages)
-├── config/       temporary test data (users and database records)
-├── context/      shared state (session: token and current user; known records)
+├── config/       the sample users listed on the login screen
+├── context/      shared state (session: token and current user; subjects, bonds, sessions and enrollments loaded from the API)
 ├── features/     one folder per screen: login, subjects, bonds, sessions
-├── hooks/        useLocalStorage, useApiAction
+├── hooks/        useLocalStorage (theme and current section), useApiAction
 └── lib/          date and time zone formatting, reading the user id from the token
 ```
 
@@ -89,7 +89,8 @@ The [usage guide](docs/USAGE.md) walks through every flow step by step, from an 
 
 ## Known limitations
 
-- **The API has no `GET` endpoints yet:** the lists only show what was created or changed from the screen itself (stored in `localStorage`). Changes the server makes to other records, such as waitlist promotion, don't show up until there is a way to query them.
+- **Lists reload after your own actions, not on their own:** what another user changes shows up after your next action or a page reload. There is no polling or push.
+- **Every list is read in full:** the API has no pagination yet, which is fine for the sample data.
 
 ## History
 

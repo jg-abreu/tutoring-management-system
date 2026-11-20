@@ -19,11 +19,11 @@ VALUES
 RETURNING id, email;
 ```
 
-Copy the returned UUIDs and emails into the `TEST_USERS` list in [`src/config/testData.ts`](../src/config/testData.ts), so the login screen fills them in and the lists show names. In the same file, empty `KNOWN_SUBJECTS` and `KNOWN_BONDS`, since they point to records from the sample data.
+Put the emails in the `TEST_USERS` list in [`src/config/testData.ts`](../src/config/testData.ts) so the login screen lists them. Everything else (subjects, bonds, sessions, names) is read from the API.
 
 ## 1. Log in
 
-Log in with a user's email and password (`senha123` for the sample users); the buttons under the form fill them in. The header shows who is logged in and their role (`ADMIN` or `USER`). Whenever a step asks for another user, click **Log out** and log in as that user.
+Log in with a user's email and password (`senha123` for the sample users); picking one in the sample users list fills in the form. The sidebar shows who is logged in and their role. Names on every screen are the part of the email before `@`. Whenever a step asks for another user, click **Log out** and log in as that user.
 
 The session lives only in memory: reloading the page, or a token that expires after 2 hours, brings back the login screen.
 
@@ -34,7 +34,7 @@ The session lives only in memory: reloading the page, or a token that expires af
 
 ## 3. Make someone a tutor ("Tutoring bonds" in the sidebar)
 
-1. As the **future tutor**, pick the approved subject and click **Request**. The bond starts as **Pending**.
+1. As the **future tutor**, pick the approved subject in the list and click **Request**. The bond starts as **Pending**.
 2. As the **admin**, click **Approve**. That user is now a tutor for *that* subject, and the admin becomes the bond's **evaluator**.
 
 The tutor role is per subject: the same user can tutor one subject and be a student in another.
@@ -55,17 +55,17 @@ Tip: a capacity of 1 with the waitlist on is the quickest way to see the queue i
 
 ## 6. Cancel an enrollment
 
-As **the student themselves**, click **Cancel** on their enrollment. If they were confirmed, the first student in the queue is **promoted** automatically, the queue is renumbered without gaps and the promoted student gets a notification.
+As **the student themselves**, click **Cancel** on their enrollment. If they were confirmed, the first student in the queue is **promoted** automatically: the seat map shows them taking the free seat, the queue is renumbered without gaps and the promoted student gets a notification.
 
 ## 7. Cancel the session or revoke the bond
 
 - **Cancel session:** only the bond's **evaluator** (the admin who approved it).
-- **Revoke bond** (Tutoring bonds, as admin): the tutor loses the bond and **all of their future sessions** are cancelled in cascade.
+- **Revoke bond** (Tutoring bonds, as admin): the tutor loses the bond and **all of their future sessions** are cancelled in cascade; the Sessions screen shows them as cancelled.
 
-## v1 limitations you'll notice
+## What you'll notice
 
-- The API has no `GET` endpoints yet, so the lists show **only what this screen created** (stored in the browser). Changes the server makes to other records, such as a waitlist promotion or the revocation cascade, happen in the database but don't show up on screen.
-- The **"Clear local data"** button in the note at the top of each screen wipes those lists from the browser. It doesn't delete anything from the database.
+- Every screen reads from the API, so reloading the page and logging in again shows the same data.
+- Lists reload after your own actions. What another user changes in the meantime shows up after your next action or a reload.
 
 ## Without this client
 

@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import type { CreateSessionInput } from '../../api/sessions'
-import { UuidInput, type UuidOption } from '../../components/UuidInput'
+import { RecordSelect, type RecordOption } from '../../components/RecordSelect'
 import { toOffsetDateTime } from '../../lib/format'
 
 function tomorrowAt(hour: number): string {
@@ -12,13 +12,13 @@ function tomorrowAt(hour: number): string {
 
 type Props = {
   userLabel: string
-  bondOptions: UuidOption[]
+  bondOptions: RecordOption[]
   busy: boolean
   onSubmit: (input: CreateSessionInput) => void
 }
 
 export function CreateSessionForm({ userLabel, bondOptions, busy, onSubmit }: Props) {
-  const [bondUuid, setBondUuid] = useState(bondOptions[0]?.id ?? '')
+  const [bondUuid, setBondUuid] = useState('')
   const [start, setStart] = useState(tomorrowAt(14))
   const [end, setEnd] = useState(tomorrowAt(16))
   const [spots, setSpots] = useState(1)
@@ -27,7 +27,7 @@ export function CreateSessionForm({ userLabel, bondOptions, busy, onSubmit }: Pr
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
     onSubmit({
-      tutoringBondUuid: bondUuid.trim(),
+      tutoringBondUuid: bondUuid,
       startTime: toOffsetDateTime(start),
       endTime: toOffsetDateTime(end),
       spots,
@@ -39,7 +39,14 @@ export function CreateSessionForm({ userLabel, bondOptions, busy, onSubmit }: Pr
     <form className="card form" onSubmit={handleSubmit}>
       <h2>New session</h2>
 
-      <UuidInput label="Tutoring bond (must be approved)" value={bondUuid} onChange={setBondUuid} options={bondOptions} />
+      <RecordSelect
+        label="Tutoring bond"
+        value={bondUuid}
+        onChange={setBondUuid}
+        options={bondOptions}
+        placeholder="Pick an approved bond"
+        emptyText="No approved bonds you can use"
+      />
 
       <label className="field">
         <span>Start</span>
@@ -62,7 +69,7 @@ export function CreateSessionForm({ userLabel, bondOptions, busy, onSubmit }: Pr
       </label>
 
       <div className="form-actions">
-        <button type="submit" className="btn btn-primary" disabled={busy}>
+        <button type="submit" className="btn btn-primary" disabled={busy || bondOptions.length === 0}>
           Create session as {userLabel}
         </button>
       </div>

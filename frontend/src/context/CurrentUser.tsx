@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { authApi } from '../api/auth'
 import { setAuthToken, setUnauthorizedHandler } from '../api/client'
-import { TEST_USERS } from '../config/testData'
+import { displayName } from '../lib/format'
 import { userIdFromToken } from '../lib/token'
 import { CurrentUserContext, type CurrentUser } from './currentUserContext'
 
@@ -31,7 +31,7 @@ export function CurrentUserProvider({ children }: { children: ReactNode }) {
       id,
       email,
       role: response.role,
-      label: TEST_USERS.find((u) => u.id === id)?.label ?? email.split('@')[0],
+      label: displayName(email),
     })
     setSessionExpired(false)
   }, [])

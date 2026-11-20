@@ -10,6 +10,10 @@ export type CreateSessionInput = {
 }
 
 export const sessionsApi = {
+  list: () => api.get<Session[]>('/sessions'),
+
+  enrollments: (sessionUuid: string) => api.get<Enrollment[]>(`/sessions/${sessionUuid}/enrollments`),
+
   create: (input: CreateSessionInput) => api.post<Session>('/sessions', input),
 
   cancel: (sessionUuid: string) => api.patch<Session>(`/sessions/${sessionUuid}/cancel`),

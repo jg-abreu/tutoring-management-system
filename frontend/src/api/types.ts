@@ -1,13 +1,10 @@
-// Shapes returned by the API (JPA entities serialized by Jackson).
+// Shapes returned by the API (the response records in its dto/ package).
 
 export type UserRole = 'ADMIN' | 'USER'
 
-export type User = {
+export type UserSummary = {
   id: string
   email: string
-  active: boolean
-  role: UserRole
-  createdAt: string
 }
 
 export type LoginResponse = {
@@ -23,8 +20,8 @@ export type Subject = {
   id: string
   name: string
   status: SubjectStatus
-  creator: User
-  evaluator: User | null
+  creator: UserSummary
+  evaluator: UserSummary | null
   createdAt: string
 }
 
@@ -33,8 +30,8 @@ export type BondStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'REVOKED'
 export type TutoringBond = {
   id: string
   status: BondStatus
-  requester: User
-  evaluator: User | null
+  requester: UserSummary
+  evaluator: UserSummary | null
   subject: Subject
   createdAt: string
 }
@@ -59,6 +56,6 @@ export type Enrollment = {
   status: EnrollmentStatus
   queuePosition: number | null
   session: Session
-  student: User
+  student: UserSummary
   createdAt: string
 }

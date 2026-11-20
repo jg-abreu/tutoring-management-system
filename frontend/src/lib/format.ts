@@ -40,3 +40,7 @@ export function dayParts(iso: string) {
     full: d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }),
   }
 }
+
+export function displayName(email: string): string {
+  return email.split('@')[0]
+}

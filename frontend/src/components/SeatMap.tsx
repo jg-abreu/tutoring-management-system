@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import type { Enrollment } from '../api/types'
-import { userLabel } from '../config/testData'
-import { initials } from '../lib/format'
+import { displayName, initials } from '../lib/format'
 
 type Props = {
   spots: number
@@ -31,9 +30,9 @@ export function SeatMap({ spots, allowsWaitlist, enrollments }: Props) {
             <span
               key={enrollment.id}
               className={`seat seat-taken${firstSeen.has(enrollment.id) ? '' : ' seat-new'}`}
-              title={`${userLabel(enrollment.student.id)}, confirmed`}
+              title={`${displayName(enrollment.student.email)}, confirmed`}
             >
-              {initials(userLabel(enrollment.student.id))}
+              {initials(displayName(enrollment.student.email))}
             </span>
           ) : (
             <span key={`free-${i}`} className="seat" title="Free spot" />
@@ -44,9 +43,9 @@ export function SeatMap({ spots, allowsWaitlist, enrollments }: Props) {
           <span
             key={enrollment.id}
             className="seat seat-waiting"
-            title={`${userLabel(enrollment.student.id)}, waitlist position ${enrollment.queuePosition}`}
+            title={`${displayName(enrollment.student.email)}, waitlist position ${enrollment.queuePosition}`}
           >
-            {initials(userLabel(enrollment.student.id))}
+            {initials(displayName(enrollment.student.email))}
             <span className="seat-position tabular">{enrollment.queuePosition}</span>
           </span>
         ))}
