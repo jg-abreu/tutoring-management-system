@@ -1,0 +1,78 @@
+import { useState, type FormEvent } from 'react'
+import type { CreateSessionInput } from '../../api/sessions'
+import { RecordSelect, type RecordOption } from '../../components/RecordSelect'
+import { toOffsetDateTime } from '../../lib/format'
+
+function tomorrowAt(hour: number): string {
+  const d = new Date()
+  d.setDate(d.getDate() + 1)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(hour)}:00`
+}
+
+type Props = {
+  userLabel: string
+  bondOptions: RecordOption[]
+  busy: boolean
+  onSubmit: (input: CreateSessionInput) => void
+}
+
+export function CreateSessionForm({ userLabel, bondOptions, busy, onSubmit }: Props) {
+  const [bondUuid, setBondUuid] = useState('')
+  const [start, setStart] = useState(tomorrowAt(14))
+  const [end, setEnd] = useState(tomorrowAt(16))
+  const [spots, setSpots] = useState(1)
+  const [allowsWaitlist, setAllowsWaitlist] = useState(true)
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    onSubmit({
+      tutoringBondUuid: bondUuid,
+      startTime: toOffsetDateTime(start),
+      endTime: toOffsetDateTime(end),
+      spots,
+      allowsWaitlist,
+    })
+  }
+
+  return (
+    <form className="card form" onSubmit={handleSubmit}>
+      <h2>New session</h2>
+
+      <RecordSelect
+        label="Tutoring bond"
+        value={bondUuid}
+        onChange={setBondUuid}
+        options={bondOptions}
+        placeholder="Pick an approved bond"
+        emptyText="No approved bonds you can use"
+      />
+
+      <label className="field">
+        <span>Start</span>
+        <input type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} required />
+      </label>
+
+      <label className="field">
+        <span>End</span>
+        <input type="datetime-local" value={end} onChange={(e) => setEnd(e.target.value)} required />
+      </label>
+
+      <label className="field">
+        <span>Capacity</span>
+        <input type="number" min={1} value={spots} onChange={(e) => setSpots(Number(e.target.value))} required />
+      </label>
+
+      <label className="field field-check">
+        <input type="checkbox" checked={allowsWaitlist} onChange={(e) => setAllowsWaitlist(e.target.checked)} />
+        <span>Allow waitlist</span>
+      </label>
+
+      <div className="form-actions">
+        <button type="submit" className="btn btn-primary" disabled={busy || bondOptions.length === 0}>
+          Create session as {userLabel}
+        </button>
+      </div>
+    </form>
+  )
+}

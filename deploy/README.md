@@ -44,9 +44,10 @@ cd /opt/tutoring-api && sudo docker compose up -d --force-recreate
 sudo docker logs -f tutoring-production-api-1      # wait for "Started", then check a login
 ```
 
-The client, from the `tutoring-management` repository (in Git Bash, `MSYS_NO_PATHCONV=1` keeps `/api` from being rewritten into a Windows path):
+The client, from `frontend/` (in Git Bash, `MSYS_NO_PATHCONV=1` keeps `/api` from being rewritten into a Windows path):
 
 ```bash
+cd frontend
 MSYS_NO_PATHCONV=1 VITE_API_URL=/api npm run build
 tar -czf client.tgz -C dist . && scp client.tgz ubuntu@<ip>:/tmp/
 # on the server: extract into /var/www/tutoring.new, then swap it with /var/www/tutoring

@@ -1,0 +1,18 @@
+server {
+    listen 80;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # /api/subjects -> ${API_URL}/subjects. API_URL is replaced when the container starts
+    # (nginx image templates); nginx variables such as $http_host are left untouched.
+    location /api/ {
+        proxy_pass ${API_URL}/;
+        # $http_host keeps the port (localhost:3000), so Spring sees the same origin as the
+        # browser and skips CORS; $host drops it and every POST/PATCH failed with 403.
+        proxy_set_header Host $http_host;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
