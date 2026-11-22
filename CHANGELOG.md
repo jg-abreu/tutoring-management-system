@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Removed
+
+- References to the Neon database, which is retired: the demo runs on its own database on the VM and development uses the Docker database.
+
 ### Changed
 
 - The React client is back in `frontend/` with its commit history, and the repository is named `tutoring-management-system` again. Docker Compose starts PostgreSQL, the API and the client, and CI runs the backend suite and the client's lint and build. The `tutoring-management` repository is archived.

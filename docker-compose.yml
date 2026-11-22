@@ -24,7 +24,7 @@ services:
   api:
     build: .
     environment:
-      # Override the application.properties settings (which point to Neon)
+      # Point the API at the db service instead of localhost:5433 from application.properties
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/tutoring
       SPRING_DATASOURCE_USERNAME: tutoring
       SPRING_DATASOURCE_PASSWORD: tutoring
