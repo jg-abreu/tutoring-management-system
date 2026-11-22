@@ -1,5 +1,5 @@
-# Starts PostgreSQL and the API with sample data: docker compose up --build
-# API: http://localhost:8080 | Postgres: localhost:5433
+# Starts PostgreSQL, the API and the client with sample data: docker compose up --build
+# Client: http://localhost:3000 | API: http://localhost:8080 | Postgres: localhost:5433
 # Development credentials, only for this local database (the real database is a different one).
 
 services:
@@ -35,6 +35,15 @@ services:
         condition: service_healthy
     ports:
       - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    environment:
+      API_URL: http://api:8080
+    depends_on:
+      - api
+    ports:
+      - "3000:80"
 
 volumes:
   pgdata:

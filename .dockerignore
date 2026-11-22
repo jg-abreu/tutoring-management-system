@@ -3,6 +3,7 @@
 .mvn
 .claude
 target
+frontend
 docker
 docs
 http
