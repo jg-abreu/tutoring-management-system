@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- The React client is back in `frontend/` with its commit history, and the repository is named `tutoring-management-system` again. Docker Compose starts PostgreSQL, the API and the client, and CI runs the backend suite and the client's lint and build. The `tutoring-management` repository is archived.
+
 ## [2.0.0] - 2026-11-20
 
 A public demo at [tutoring.joaoabreu.dev](https://tutoring.joaoabreu.dev), with authentication, roles and read endpoints.
@@ -70,8 +74,8 @@ A public demo at [tutoring.joaoabreu.dev](https://tutoring.joaoabreu.dev), with 
 - Centralized error handling mapping domain exceptions to `400`, `403`, `404` and `409`.
 - Unit tests with JUnit 5 and Mockito for every service.
 
-[Unreleased]: https://github.com/jg-abreu/tutoring-management-api/compare/v2.0...HEAD
-[2.0.0]: https://github.com/jg-abreu/tutoring-management-api/compare/v1.2...v2.0
+[Unreleased]: https://github.com/jg-abreu/tutoring-management-system/compare/v2.0...HEAD
+[2.0.0]: https://github.com/jg-abreu/tutoring-management-system/compare/v1.2...v2.0
 [1.2.0]: https://github.com/jg-abreu/tutoring-management-system/compare/v1.1...v1.2
 [1.1.0]: https://github.com/jg-abreu/tutoring-management-system/compare/v1.0...v1.1
 [1.0.0]: https://github.com/jg-abreu/tutoring-management-system/releases/tag/v1.0

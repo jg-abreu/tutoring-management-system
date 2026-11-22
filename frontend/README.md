@@ -1,13 +1,13 @@
-# Tutoring Management
+# Tutoring Management — client
 
-[![CI](https://github.com/jg-abreu/tutoring-management/actions/workflows/ci.yml/badge.svg)](https://github.com/jg-abreu/tutoring-management/actions/workflows/ci.yml)
+[![CI](https://github.com/jg-abreu/tutoring-management-system/actions/workflows/ci.yml/badge.svg)](https://github.com/jg-abreu/tutoring-management-system/actions/workflows/ci.yml)
 ![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![TypeScript 6](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
 ![Vite 8](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
 
 **Live demo: [tutoring.joaoabreu.dev](https://tutoring.joaoabreu.dev)** — pick any sample user on the login screen (password `senha123`). The data resets to the sample set every day at 06:00 UTC.
 
-Web client for the [Tutoring Management API](https://github.com/jg-abreu/tutoring-management-api). It covers the whole flow in the browser: suggesting and approving subjects, requesting and evaluating tutoring bonds, creating and cancelling sessions, enrolling students and cancelling enrollments (with a waitlist).
+Web client for the [Tutoring Management API](../README.md), at the root of this repository. It covers the whole flow in the browser: suggesting and approving subjects, requesting and evaluating tutoring bonds, creating and cancelling sessions, enrolling students and cancelling enrollments (with a waitlist).
 
 <p align="center">
   <picture>
@@ -28,13 +28,15 @@ The business rules, the database and the tests live in the API repository; this 
 
 ## Running
 
-Both options need the API running on `http://localhost:8080`. The quickest way is Docker, in the API repository:
+The quickest way is Docker Compose at the repository root, which starts PostgreSQL, the API and this client (http://localhost:3000):
 
 ```bash
-git clone https://github.com/jg-abreu/tutoring-management-api.git
-cd tutoring-management-api
+git clone https://github.com/jg-abreu/tutoring-management-system.git
+cd tutoring-management-system
 docker compose up --build
 ```
+
+The commands below run inside `frontend/` and need the API on `http://localhost:8080` (for example `docker compose up --build db api` at the root).
 
 ### With Node.js (development)
 
@@ -55,11 +57,7 @@ VITE_API_URL=http://other-host:8080
 
 ### With Docker
 
-```bash
-docker compose up --build
-```
-
-Open `http://localhost:3000`. nginx serves the build and forwards `/api/` to the API, so the browser sees a single origin. The API address comes from the `API_URL` environment variable (default `http://host.docker.internal:8080`, the API on your machine); if another program uses port 8080 on your machine, point it elsewhere, for example `API_URL=http://other-host:8080 docker compose up --build`.
+The root `docker-compose.yml` builds this folder's `Dockerfile` and serves it at `http://localhost:3000`. nginx serves the build and forwards `/api/` to the API, so the browser sees a single origin. The API address comes from the `API_URL` environment variable, which Compose sets to the `api` service; the image's default is `http://host.docker.internal:8080`, the API on your machine.
 
 ### Production build
 
@@ -69,7 +67,7 @@ The live demo serves a static build from the same origin as the API, which nginx
 VITE_API_URL=/api npm run build
 ```
 
-In Git Bash, prefix it with `MSYS_NO_PATHCONV=1`, otherwise `/api` is rewritten into a Windows path. How the demo is hosted and deployed is in the API repository's [`deploy/README.md`](https://github.com/jg-abreu/tutoring-management-api/blob/main/deploy/README.md).
+In Git Bash, prefix it with `MSYS_NO_PATHCONV=1`, otherwise `/api` is rewritten into a Windows path. How the demo is hosted and deployed is in [`deploy/README.md`](../deploy/README.md).
 
 ### Logging in
 
@@ -106,4 +104,4 @@ The [usage guide](docs/USAGE.md) walks through every flow step by step, from an 
 
 ## History
 
-This client started in the `frontend/` folder of the API repository and moved here with its commit history.
+This client started in this `frontend/` folder, moved to its own repository (`jg-abreu/tutoring-management`, now archived) during v2.0 and came back here with its commit history.

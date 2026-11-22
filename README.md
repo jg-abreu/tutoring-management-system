@@ -1,22 +1,22 @@
-# Tutoring Management API
+# Tutoring Management System
 
-[![CI](https://github.com/jg-abreu/tutoring-management-api/actions/workflows/ci.yml/badge.svg)](https://github.com/jg-abreu/tutoring-management-api/actions/workflows/ci.yml)
+[![CI](https://github.com/jg-abreu/tutoring-management-system/actions/workflows/ci.yml/badge.svg)](https://github.com/jg-abreu/tutoring-management-system/actions/workflows/ci.yml)
 ![Java 21](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)
 ![Spring Boot 4.1](https://img.shields.io/badge/Spring_Boot-4.1-6DB33F?logo=springboot&logoColor=white)
 ![PostgreSQL 17](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A Spring Boot REST API for running academic tutoring programs: admins approve who can tutor which subject, tutors open sessions with limited spots, and students enroll — with an automatic waitlist that promotes the next student when a spot opens up.
+A Spring Boot REST API and a React client for running academic tutoring programs: admins approve who can tutor which subject, tutors open sessions with limited spots, and students enroll — with an automatic waitlist that promotes the next student when a spot opens up.
 
 <p align="center">
   <img src="docs/images/session-waitlist.png" alt="A Calculus I session with capacity 2: two students confirmed and a third on the waitlist at position 1" width="720">
   <br>
-  <sub>A session with a waitlist, as shown by the <a href="https://github.com/jg-abreu/tutoring-management">demo client</a>.</sub>
+  <sub>A session with a waitlist, as shown by the <a href="frontend/">demo client</a>.</sub>
 </p>
 
 **Live demo: [tutoring.joaoabreu.dev](https://tutoring.joaoabreu.dev)** — log in with any sample user (password `senha123`). The data resets to the sample set every day at 06:00 UTC. How it is hosted: [`deploy/README.md`](deploy/README.md).
 
-Built as a portfolio project with a focus on **domain modeling**, **business rules enforced as state machines** and **context-based authorization**, with a PostgreSQL schema designed up front. A React client that demos every flow lives in its own repository, [tutoring-management](https://github.com/jg-abreu/tutoring-management).
+Built as a portfolio project with a focus on **domain modeling**, **business rules enforced as state machines** and **context-based authorization**, with a PostgreSQL schema designed up front. A React client that demos every flow lives in [`frontend/`](frontend/).
 
 ## Contents
 
@@ -61,15 +61,16 @@ Study groups and tutoring programs at universities are usually run through sprea
 The only requirement is [Docker](https://www.docker.com/products/docker-desktop/).
 
 ```bash
-git clone https://github.com/jg-abreu/tutoring-management-api.git
-cd tutoring-management-api
+git clone https://github.com/jg-abreu/tutoring-management-system.git
+cd tutoring-management-system
 docker compose up --build
 ```
 
-Compose starts PostgreSQL with the schema and sample data, and the API:
+Compose starts PostgreSQL with the schema and sample data, the API and the client:
 
 | Service | Address | Notes |
 |---|---|---|
+| Client | http://localhost:3000 | log in with any sample user below |
 | API | http://localhost:8080 | use an HTTP client; there are no `GET` endpoints yet, so the browser shows a 404 |
 | PostgreSQL | `localhost:5433` | database, user and password: `tutoring` |
 
@@ -83,7 +84,7 @@ Log in with `POST /auth/login` and send the returned token as `Authorization: Be
 | student2 | `student2@tutoring.dev` | `USER` | Student | `fb0e9fd2-7181-495c-922b-dd4c7e5baf2c` |
 | student3 | `student3@tutoring.dev` | `USER` | Student | `b5578fc3-17cd-4277-aec8-407227991e1f` |
 
-To see the waitlist in action, run [`http/auth.http`](http/auth.http) in IntelliJ's HTTP Client to log everyone in, then [`http/session.http`](http/session.http): the tutor creates a session with 1 spot and the waitlist enabled, the three students enroll and the first one cancels. To click through the same flows in a browser, run the [demo client](#demo-client).
+To see the waitlist in action, run [`http/auth.http`](http/auth.http) in IntelliJ's HTTP Client to log everyone in, then [`http/session.http`](http/session.http): the tutor creates a session with 1 spot and the waitlist enabled, the three students enroll and the first one cancels. To click through the same flows in a browser, open the client at http://localhost:3000.
 
 Data persists across `docker compose down`; use `docker compose down -v` to reset to the sample data.
 
@@ -239,11 +240,11 @@ Servers run with `SPRING_PROFILES_ACTIVE=prod`. In that profile every value come
 
 ## Demo client
 
-[tutoring-management](https://github.com/jg-abreu/tutoring-management) is a React + TypeScript client that covers every flow in the browser. With the API running, clone it and run `npm install && npm run dev` (http://localhost:5173, already allowed by CORS) or `docker compose up --build` (http://localhost:3000). Its [usage guide](https://github.com/jg-abreu/tutoring-management/blob/main/docs/USAGE.md) walks through each flow step by step.
+[`frontend/`](frontend/) is a React + TypeScript client that covers every flow in the browser. `docker compose up --build` serves it at http://localhost:3000; for development, with the API running, run `npm install && npm run dev` in `frontend/` (http://localhost:5173, already allowed by CORS). Its [usage guide](frontend/docs/USAGE.md) walks through each flow step by step.
 
 The client logs in with the sample users (password `senha123`) and sends the token on every request.
 
-The client started in a `frontend/` folder of this repository and moved to its own repository, with its history, in v2.0.
+The client moved to its own repository (`tutoring-management`) during v2.0 and came back to `frontend/` with its history after the v2.0 release, so the API and the client change together in one PR.
 
 ## Project structure
 
@@ -260,6 +261,7 @@ The client started in a `frontend/` folder of this repository and moved to its o
 ├── deploy/             live demo: production compose, nginx site, daily reset and how to rebuild it
 ├── docker/postgres/     schema and seed loaded by Docker Compose
 ├── docs/                schema notes, design diagrams, specs
+├── frontend/            React client (see its README)
 └── http/                IntelliJ HTTP Client request collections
 ```
 
@@ -269,7 +271,7 @@ The client started in a `frontend/` folder of this repository and moved to its o
 - [x] **v1.1** — React frontend, input validation and error handling fixes
 - [x] **v1.2** — Docker Compose setup, CI and English translation
 - [x] **v2.0** — a public demo next to [joaoabreu.dev](https://joaoabreu.dev): authentication, roles, read endpoints and the client's new look
-  - ✅ Frontend moved to [its own repository](https://github.com/jg-abreu/tutoring-management); this one is the API only
+  - ✅ Frontend moved to its own repository (back in `frontend/` after the release)
   - ✅ Authentication with JWT, with the acting user taken from the token instead of the request body
   - ✅ User roles (`ADMIN`, `USER`), so admin-only actions are actually restricted
   - ✅ The React client logs in, shows admin actions only to admins and shares the portfolio's visual identity

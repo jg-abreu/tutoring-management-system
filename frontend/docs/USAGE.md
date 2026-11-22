@@ -2,7 +2,7 @@
 
 A walkthrough of the full system flow through the web interface, from an empty catalog to a session with a waitlist.
 
-The examples assume the API runs with Docker from the [API repository](https://github.com/jg-abreu/tutoring-management-api#quick-start-docker), so the sample users already exist, and this client runs as described in the [README](../README.md#running): `http://localhost:5173` with `npm run dev` or `http://localhost:3000` with Docker. If the API uses another database, follow [step 0](#0-prepare-the-users-without-docker-only) first.
+The examples assume the API runs with Docker from the [repository root](../../README.md#quick-start-docker), so the sample users already exist, and this client runs as described in the [README](../README.md#running): `http://localhost:5173` with `npm run dev` or `http://localhost:3000` with Docker. If the API uses another database, follow [step 0](#0-prepare-the-users-without-docker-only) first.
 
 ## 0. Prepare the users (without Docker only)
 
@@ -69,4 +69,4 @@ As **the student themselves**, click **Cancel** on their enrollment. If they wer
 
 ## Without this client
 
-In the API repository, [`http/session.http`](https://github.com/jg-abreu/tutoring-management-api/blob/main/http/session.http) runs the same sessions and enrollments flow directly against the API with IntelliJ's HTTP Client, including the error cases (`403`, `409`, `400`).
+At the repository root, [`http/session.http`](../../http/session.http) runs the same sessions and enrollments flow directly against the API with IntelliJ's HTTP Client, including the error cases (`403`, `409`, `400`).
