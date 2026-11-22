@@ -234,7 +234,7 @@ Servers run with `SPRING_PROFILES_ACTIVE=prod`. In that profile every value come
 
 | Variable | Example |
 |---|---|
-| `DB_URL` | `jdbc:postgresql://<host>:5432/<database>` (Neon: add `?sslmode=require`) |
+| `DB_URL` | `jdbc:postgresql://<host>:5432/<database>` (add `?sslmode=require` when the database requires TLS) |
 | `DB_USERNAME`, `DB_PASSWORD` | the database user |
 | `JWT_SECRET` | a random string of 32+ characters |
 
